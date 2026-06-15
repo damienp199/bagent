@@ -1,0 +1,8 @@
+# Binaire compilé
+/bagent
+
+# macOS
+.DS_Store
+
+# Claude local
+.claude/settings.local.json

@@ -70,6 +70,42 @@ fi
 cleanup() { printf '\e[?25h\e[?1049l'; }
 trap cleanup EXIT INT TERM
 
+# --- Fermer la fenêtre du terminal courant (détection via $TERM_PROGRAM) ---
+close_terminal() {
+  local tty_dev="$(tty 2>/dev/null)"
+  case "$TERM_PROGRAM" in
+    Apple_Terminal)
+      osascript >/dev/null 2>&1 <<EOF
+tell application "Terminal"
+  repeat with w in windows
+    repeat with t in tabs of w
+      if tty of t is "$tty_dev" then
+        close w
+        return
+      end if
+    end repeat
+  end repeat
+end tell
+EOF
+      ;;
+    iTerm.app)
+      osascript >/dev/null 2>&1 <<EOF
+tell application "iTerm2"
+  repeat with w in windows
+    repeat with t in tabs of w
+      repeat with s in sessions of t
+        if tty of s is "$tty_dev" then
+          close w
+        end if
+      end repeat
+    end repeat
+  end repeat
+end tell
+EOF
+      ;;
+  esac
+}
+
 # --- Lecture clavier ---
 read_key() {
   local key k1 k2
@@ -87,6 +123,7 @@ read_key() {
     a)         echo add    ;;
     s)         echo del    ;;
     d)         echo def    ;;
+    v)         echo vscode ;;
     [1-9])     echo "num$key" ;;
   esac
 }
@@ -406,7 +443,7 @@ draw() {
 
   FRAME+=(
     ""
-    "  ${DIM}↑↓${RST}${GRAY} naviguer${RST}  ${DIM}⏎${RST}${GRAY} ouvrir${RST}  ${GREEN}a${RST}${GRAY} ajouter${RST}  ${RED}s${RST}${GRAY} supprimer${RST}  ${DIM}d${RST}${GRAY} défaut${RST}  ${DIM}q${RST}${GRAY} quitter${RST}"
+    "  ${DIM}↑↓${RST}${GRAY} naviguer${RST}  ${DIM}⏎${RST}${GRAY} ouvrir${RST}  ${DIM}v${RST}${GRAY} code${RST}  ${GREEN}a${RST}${GRAY} ajouter${RST}  ${RED}s${RST}${GRAY} supprimer${RST}  ${DIM}d${RST}${GRAY} défaut${RST}  ${DIM}q${RST}${GRAY} quitter${RST}"
   )
 
   printf '%s\e[K\n' "${FRAME[@]}"
@@ -489,6 +526,22 @@ while true; do
     quit)
       cleanup
       exec "${SHELL:-zsh}"
+      ;;
+    vscode)
+      target="${ITEMS_FULL_PATH[$selected]}"
+      if [[ ! -d "$target" ]]; then
+        show_message "${RED}✗${RST} Dossier introuvable"
+        continue
+      fi
+      if command -v code &>/dev/null; then
+        code "$target" >/dev/null 2>&1
+      elif ! open -a "Visual Studio Code" "$target" 2>/dev/null; then
+        show_message "${RED}✗${RST} VSCode introuvable"
+        continue
+      fi
+      cleanup
+      close_terminal
+      exit 0
       ;;
     add)
       # Si un récent est sélectionné, l'épingler directement
