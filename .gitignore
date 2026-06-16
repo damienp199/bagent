@@ -1,6 +1,9 @@
 # Binaire compilé
 /bagent
 
+# Binaires de release
+/dist/
+
 # macOS
 .DS_Store
 

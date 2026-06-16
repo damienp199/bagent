@@ -54,23 +54,25 @@ bagent --help    # aide
 
 ## Installation
 
-Nécessite [Go](https://go.dev/) (et `git`) pour compiler.
+macOS (Apple Silicon & Intel). **Aucune dépendance** — un binaire précompilé est téléchargé depuis les [Releases](https://github.com/damienp199/bagent/releases).
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/damienp199/bagent/main/install.sh | sh
 ```
 
-Ou depuis un clone :
+Le script télécharge le binaire, le signe (ad-hoc) et l'installe dans `~/.local/bin` par
+renommage atomique — ce qui évite le `zsh: killed` dû au cache de signature du noyau
+lors d'un remplacement de binaire en place. Assure-toi que `~/.local/bin` est dans ton `PATH`.
+
+### Depuis les sources (dev)
+
+Nécessite [Go](https://go.dev/). Lancé depuis un clone, le même script compile au lieu de télécharger :
 
 ```sh
 git clone https://github.com/damienp199/bagent.git
 cd bagent
 ./install.sh
 ```
-
-Le script compile, signe (macOS Apple Silicon) et installe dans `~/.local/bin` par
-renommage atomique — ce qui évite le `zsh: killed` dû au cache de signature du noyau
-lors d'un remplacement de binaire en place. Assure-toi que `~/.local/bin` est dans ton `PATH`.
 
 ## Configuration
 
