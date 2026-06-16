@@ -66,9 +66,12 @@ func (m model) renderTabs(width int) string {
 
 	var parts []string
 	for i := start; i < end; i++ {
-		if i == m.pageIdx {
+		switch {
+		case i == m.pageIdx && m.mode == modeReorder:
+			parts = append(parts, stArrow.Render("‹")+activeStyle.Render(labels[i])+stArrow.Render("›"))
+		case i == m.pageIdx:
 			parts = append(parts, activeStyle.Render(labels[i]))
-		} else {
+		default:
 			parts = append(parts, stTabInactive.Render(labels[i]))
 		}
 	}
@@ -214,11 +217,16 @@ func (m model) footerKeys() string {
 	gsep := stFooter.Render("   ") // séparateur entre groupes
 	page := m.curPage()
 
+	// Mode ordre : déplacement de l'onglet.
+	if m.mode == modeReorder {
+		return key("‹/›", "déplacer") + dot + key("⏎/échap", "terminer") + gsep + key("q", "quit")
+	}
+
 	// Barre : pas de flèches (nav évidente).
 	if m.focus == focusBar {
 		actions := []string{key("a", "projet")}
 		if page.Kind == KindProjet {
-			actions = append(actions, key("s", "retirer"), key("r", "renommer"), key("⏎", "finder"))
+			actions = append(actions, key("o", "ordre"), key("s", "retirer"), key("r", "renommer"), key("⏎", "finder"))
 		}
 		return strings.Join(actions, dot) + gsep + key("q", "quit")
 	}

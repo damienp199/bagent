@@ -28,8 +28,19 @@ func stripANSI(s string) string {
 
 func press(m model, s string) model {
 	msg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(s)}
-	if s == "right" {
+	switch s {
+	case "right":
 		msg = tea.KeyMsg{Type: tea.KeyRight}
+	case "left":
+		msg = tea.KeyMsg{Type: tea.KeyLeft}
+	case "up":
+		msg = tea.KeyMsg{Type: tea.KeyUp}
+	case "down":
+		msg = tea.KeyMsg{Type: tea.KeyDown}
+	case "enter":
+		msg = tea.KeyMsg{Type: tea.KeyEnter}
+	case "esc":
+		msg = tea.KeyMsg{Type: tea.KeyEsc}
 	}
 	nm, _ := m.Update(msg)
 	return nm.(model)

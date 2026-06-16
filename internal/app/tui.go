@@ -43,6 +43,7 @@ const (
 	modeList uiMode = iota
 	modeInput
 	modeDelConfirm
+	modeReorder
 )
 
 type focusZone int
@@ -76,6 +77,7 @@ func newModel() model {
 	ti.Prompt = ""
 	ti.Width = 50
 	m := model{mode: modeList, focus: focusList, input: ti, height: 24, width: 80}
+	pruneDeadEntries() // purge les projets pointant vers un dossier disparu
 	m.pages = buildPages()
 	m.pageIdx = favorisIndex(m.pages) // page d'accueil = Favoris
 	m.clamp()
@@ -184,6 +186,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateInput(msg)
 		case modeDelConfirm:
 			return m.updateDelConfirm(msg)
+		case modeReorder:
+			return m.updateReorder(msg)
 		default:
 			return m.updateList(msg)
 		}
@@ -239,6 +243,9 @@ func (m model) updateBar(s string) (tea.Model, tea.Cmd) {
 	}
 	if page.Kind == KindProjet {
 		switch s {
+		case "o":
+			m.mode = modeReorder
+			return m, nil
 		case "s":
 			m.mode = modeDelConfirm
 		case "r":
@@ -251,6 +258,37 @@ func (m model) updateBar(s string) (tea.Model, tea.Cmd) {
 			}
 			return m, clearStatusCmd()
 		}
+	}
+	return m, nil
+}
+
+// updateReorder : mode « ordre », ←/→ déplacent l'onglet projet courant.
+func (m model) updateReorder(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "ctrl+c", "q":
+		return m, tea.Quit
+	case "esc", "enter", "o":
+		m.mode = modeList
+		return m, nil
+	case "left", "h":
+		return m.moveCurrentProject(-1)
+	case "right", "l":
+		return m.moveCurrentProject(+1)
+	}
+	return m, nil
+}
+
+// moveCurrentProject déplace l'onglet projet courant d'une position et fait
+// suivre le focus au projet déplacé.
+func (m model) moveCurrentProject(dir int) (tea.Model, tea.Cmd) {
+	j := m.pageIdx + dir
+	if j < 0 || j >= len(m.pages) || m.pages[j].Kind != KindProjet {
+		return m, nil // bord visuel (Favoris à gauche, dernier onglet à droite)
+	}
+	parent := m.curPage().Parent
+	if swapProjects(parent, m.pages[j].Parent) {
+		m.reload()
+		m.gotoProjet(parent)
 	}
 	return m, nil
 }

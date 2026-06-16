@@ -43,23 +43,34 @@ friction, sans jamais déplacer Récents/Favoris (qui restent en positions 0-1).
 
 ## Découpage technique
 
+Le déplacement raisonne dans **l'espace des onglets visibles**, pas dans
+l'espace des lignes du fichier : un projet dont le dossier a disparu (`isDir`
+faux) est invisible mais resterait présent dans le fichier. Échanger par
+position de ligne ferait glisser un onglet derrière ces projets « morts » sans
+effet visible (décalage backend/écran). On échange donc le projet courant avec
+le projet **affiché** voisin, et on purge les entrées mortes au démarrage.
+
 1. **`workspace.go`**
-   - `reorderEntries(lines []string, target string, dir int) []string` :
-     fonction **pure** qui échange l'entrée `target` (ligne complète, ex.
-     `">"+parent`) avec sa voisine `>` dans le sens `dir` (±1). No-op si la
-     cible est introuvable, au bord, ou si la voisine n'est pas une entrée `>`.
-     C'est le cœur testable de la logique (comme `remapPath`).
-   - `moveProject(parent string, dir int) bool` : wrapper I/O — charge les
-     lignes, applique `reorderEntries`, réécrit le fichier si l'ordre a changé.
-     Renvoie `true` si un déplacement a eu lieu.
+   - `swapEntries(lines []string, x, y string) []string` : fonction **pure** qui
+     échange les positions des lignes `x` et `y`. No-op si l'une est absente.
+   - `swapProjects(a, b string) bool` : wrapper I/O — échange les positions des
+     projets `a` et `b` dans le fichier, réécrit si l'ordre change.
+   - `pruneDeadFile(path string) bool` : retire d'un fichier de chemins les
+     lignes pointant vers un dossier inexistant (préfixe `>` conservé).
+   - `pruneDeadEntries() bool` : applique `pruneDeadFile` à tous les fichiers de
+     chemins persistés (`workspaces`, `favorites`). Les récents sont filtrés
+     dynamiquement, donc rien à purger côté persistance.
 
 2. **`tui.go`**
    - Nouveau `modeReorder` dans l'enum `uiMode`.
+   - `newModel` appelle `pruneDeadEntries()` avant `buildPages()`.
    - `updateBar` : `o` sur un `KindProjet` passe en `modeReorder`.
    - `updateReorder(msg)` : route `←/→/h/l` vers le déplacement, `⏎/échap`
      vers la sortie du mode, `q/ctrl+c` vers quit.
-   - `moveCurrentProject(dir)` : appelle `moveProject`, puis `reload()` +
-     `gotoProjet(parent)` pour faire suivre `pageIdx`.
+   - `moveCurrentProject(dir)` : détermine le projet visible voisin
+     (`pages[pageIdx+dir]` si `KindProjet`, sinon no-op — borne à Favoris),
+     appelle `swapProjects`, puis `reload()` + `gotoProjet(parent)` pour faire
+     suivre `pageIdx`.
    - `Update` route vers `updateReorder` quand `m.mode == modeReorder`. Cela
      court-circuite l'interception globale de `←/→` dans `updateList` (qui
      navigue normalement entre onglets).
@@ -71,15 +82,18 @@ friction, sans jamais déplacer Récents/Favoris (qui restent en positions 0-1).
 
 ## Tests
 
-- `reorder_test.go` — `TestReorderEntries` : table de cas sur la fonction pure
-  (déplacement gauche/droite, bornes, cible absente). Déterministe, sans I/O.
+- `TestSwapEntries` : table de cas sur la fonction pure (échange adjacents,
+  échange distants à travers une entrée morte, entrée absente). Sans I/O.
+- `TestSwapProjectsFile` : exerce `swapProjects` de bout en bout en redirigeant
+  `HOME` (`t.Setenv`), sans toucher au fichier de config réel.
+- `TestPruneDeadEntries` : vérifie la purge des dossiers morts dans `workspaces`
+  **et** `favorites`, idempotence (no-op si rien à nettoyer).
+- `TestReorderSkipsDeadProjects` : régression — déplacer un onglet par-dessus un
+  projet mort ne crée pas de pas fantôme (`pageIdx` et affichage restent
+  synchronisés).
 - Routage UI : `o` en `focusBar`/projet → `modeReorder` ; `échap` → `modeList`.
   Construits sur un `model` aux `pages` fixées en mémoire (pas d'I/O).
 - Rendu : un `model` en `modeReorder` affiche les chevrons autour du bon onglet.
-
-`moveProject` est un wrapper I/O trivial sur le fichier global (comme
-`addEntry`/`removeEntry`, non testés) ; sa logique réelle est couverte par
-`reorderEntries`.
 
 ## Hors périmètre
 
