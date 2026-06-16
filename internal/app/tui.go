@@ -200,6 +200,15 @@ func (m model) launch(action string, it Item) (tea.Model, tea.Cmd) {
 		m.status = stRed.Render("✗") + " Dossier introuvable"
 		return m, clearStatusCmd()
 	}
+	if action == "vscode" {
+		// VSCode s'ouvre en détaché : on reste dans le menu (pas de tea.Quit).
+		if err := openVSCode(it.FullPath); err != nil {
+			m.status = stRed.Render("✗") + " " + err.Error()
+		} else {
+			m.status = stGreen.Render("✓") + " VSCode " + stDim.Render(it.Name)
+		}
+		return m, clearStatusCmd()
+	}
 	if action == "claude" || action == "codex" {
 		if !toolAvailable(action) {
 			m.status = stRed.Render("✗") + " " + action + " non installé"

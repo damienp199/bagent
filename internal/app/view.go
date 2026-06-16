@@ -223,7 +223,7 @@ func (m model) footerKeys() string {
 	var actions []string
 	switch page.Kind {
 	case KindFavoris:
-		actions = []string{key("a", "path"), key("f", "retirer")}
+		actions = []string{key("a", "ajouter"), key("f", "retirer")}
 	case KindProjet:
 		actions = []string{key("a", "ajouter"), key("f", "favori")}
 	case KindRecents:
