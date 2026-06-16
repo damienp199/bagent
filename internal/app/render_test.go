@@ -19,12 +19,15 @@ func TestTabsUppercaseAndGroupFooter(t *testing.T) {
 		}
 		m = press(m, "right")
 	}
+	if m.curPage().Kind != KindProjet {
+		t.Skip("aucune page de projet dans cette config")
+	}
 	out := stripANSI(m.View())
-	if !strings.Contains(out, "FAVORIS") {
-		t.Errorf("onglets non en majuscules:\n%s", out)
+	if title := strings.ToUpper(m.curPage().Title); !strings.Contains(out, title) {
+		t.Errorf("nom du projet en majuscules absent (%q):\n%s", title, out)
 	}
 	if !strings.Contains(out, "dossier") {
-		t.Errorf("footer page groupe sans dossier:\n%s", out)
+		t.Errorf("footer page projet sans dossier:\n%s", out)
 	}
 }
 

@@ -18,13 +18,16 @@ func TestViewFillsHeight(t *testing.T) {
 	}
 }
 
-// buildPages doit toujours produire au moins Favoris + Directs + Récents.
+// buildPages : Récents en tête, Favoris présent ensuite.
 func TestBuildPages(t *testing.T) {
 	pages := buildPages()
-	if len(pages) < 3 {
-		t.Fatalf("attendu >=3 pages, obtenu %d", len(pages))
+	if len(pages) < 2 {
+		t.Fatalf("attendu >=2 pages, obtenu %d", len(pages))
 	}
-	if pages[0].Kind != KindFavoris {
-		t.Errorf("1re page doit être Favoris, obtenu %v", pages[0].Title)
+	if pages[0].Kind != KindRecents {
+		t.Errorf("1re page doit être Récents, obtenu %v", pages[0].Title)
+	}
+	if pages[favorisIndex(pages)].Kind != KindFavoris {
+		t.Errorf("page Favoris introuvable")
 	}
 }

@@ -8,7 +8,7 @@ import (
 
 const reservedLines = 6 // margin, tabs, séparateur, blank, footer(2)
 
-var stTabDanger = lipgloss.NewStyle().Bold(true).Foreground(cBlack).Background(cRed)
+var stTabDanger = lipgloss.NewStyle().Bold(true).Foreground(cBlack).Background(cRed).Padding(0, 1)
 
 func min(a, b int) int {
 	if a < b {
@@ -22,15 +22,16 @@ func (m model) renderTabs(width int) string {
 	labels := make([]string, len(m.pages))
 	widths := make([]int, len(m.pages))
 	for i, p := range m.pages {
+		// Favoris/Récents : icône seule. Projets : nom en majuscules.
 		lab := strings.ToUpper(p.Title)
 		if p.Icon != "" {
-			lab = p.Icon + " " + lab
+			lab = p.Icon
 		}
 		labels[i] = lab
-		widths[i] = lipgloss.Width(lab)
+		widths[i] = lipgloss.Width(lab) + 2 // +2 pour le padding (1 espace de chaque côté)
 	}
 
-	const gap = 3
+	const gap = 0 // l'espacement vient des marges des onglets
 	target := width - 6
 	if target < 12 {
 		target = 12
@@ -209,27 +210,34 @@ func (m model) footerKeys() string {
 	key := func(k, label string) string {
 		return stKey.Render(k) + stFooter.Render(" "+label)
 	}
-	var parts []string
+	dot := stFooter.Render(" · ")  // séparateur compact dans un groupe
+	gsep := stFooter.Render("   ") // séparateur entre groupes
 	page := m.curPage()
 
+	// Barre : pas de flèches (nav évidente).
 	if m.focus == focusBar {
-		parts = append(parts, key("←→", "onglet"), key("↓", "entrer"), key("a", "projet"))
+		actions := []string{key("a", "projet")}
 		if page.Kind == KindProjet {
-			parts = append(parts, key("s", "retirer"), key("r", "renommer"), key("⏎", "finder"))
+			actions = append(actions, key("s", "retirer"), key("r", "renommer"), key("⏎", "finder"))
 		}
-		parts = append(parts, key("q", "quit"))
-		return strings.Join(parts, "  ")
+		return strings.Join(actions, dot) + gsep + key("q", "quit")
 	}
 
-	parts = append(parts, key("↑↓", ""), key("←→", "onglet"), key("⏎", "vscode"), key("c", "claude"), key("x", "codex"))
+	// Liste : groupe « ouvrir » (⏎ vscode · c claude · x codex) compacté + actions.
+	open := stKey.Render("⏎·c·x") + stFooter.Render(" ouvrir")
+	var actions []string
 	switch page.Kind {
 	case KindFavoris:
-		parts = append(parts, key("a", "path"), key("s", "retirer"))
+		actions = []string{key("a", "path"), key("s", "retirer")}
 	case KindProjet:
-		parts = append(parts, key("a", "dossier"), key("s", "suppr"), key("r", "renommer"), key("f", "favori"))
+		actions = []string{key("a", "dossier"), key("s", "suppr"), key("r", "renommer"), key("f", "favori")}
 	case KindRecents:
-		parts = append(parts, key("f", "favori"))
+		actions = []string{key("f", "favori")}
 	}
-	parts = append(parts, key("q", "quit"))
-	return strings.Join(parts, "  ")
+	groups := []string{open}
+	if len(actions) > 0 {
+		groups = append(groups, strings.Join(actions, dot))
+	}
+	groups = append(groups, key("q", "quit"))
+	return strings.Join(groups, gsep)
 }

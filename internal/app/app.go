@@ -48,14 +48,21 @@ func execAction(action, target string) {
 	}
 }
 
-// runDefault ouvre le premier workspace disponible (1er favori, sinon 1er direct…)
+// runDefault ouvre le 1er favori (sinon le 1er workspace disponible)
 // dans VSCode, l'action par défaut.
 func runDefault() {
+	pages := buildPages()
 	target := ""
-	for _, p := range buildPages() {
-		if len(p.Items) > 0 {
-			target = p.Items[0].FullPath
-			break
+	// Priorité aux favoris.
+	if fi := favorisIndex(pages); len(pages[fi].Items) > 0 {
+		target = pages[fi].Items[0].FullPath
+	}
+	if target == "" {
+		for _, p := range pages {
+			if len(p.Items) > 0 {
+				target = p.Items[0].FullPath
+				break
+			}
 		}
 	}
 	if target == "" {

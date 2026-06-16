@@ -186,14 +186,19 @@ func loadRecents(dirs []string) []string {
 	return recents
 }
 
-// buildPages construit l'ensemble des pages : Favoris, Directs, un groupe par
-// page, puis Récents.
+// buildPages construit les pages dans l'ordre des onglets :
+// ◷ Récents · ★ Favoris · un projet par page.
 func buildPages() []Page {
 	dirs := loadDirs()
 	favs := favoriteSet()
-	var pages []Page
 
-	// Favoris (ordre du fichier favorites)
+	// Récents (à gauche)
+	var recItems []Item
+	for _, r := range loadRecents(dirs) {
+		recItems = append(recItems, Item{Name: filepath.Base(r), FullPath: r, Fav: favs[r]})
+	}
+
+	// Favoris
 	var favItems []Item
 	for _, f := range loadFavorites() {
 		if !isDir(f) {
@@ -201,7 +206,11 @@ func buildPages() []Page {
 		}
 		favItems = append(favItems, Item{Name: filepath.Base(f), FullPath: f, Fav: true})
 	}
-	pages = append(pages, Page{Title: "Favoris", Icon: "★", Kind: KindFavoris, Items: favItems})
+
+	pages := []Page{
+		{Title: "Récents", Icon: "◷", Kind: KindRecents, Items: recItems},
+		{Title: "Favoris", Icon: "★", Kind: KindFavoris, Items: favItems},
+	}
 
 	// Un projet par page (lignes préfixées ">").
 	for _, d := range dirs {
@@ -220,14 +229,17 @@ func buildPages() []Page {
 		pages = append(pages, Page{Title: filepath.Base(parent), Kind: KindProjet, Parent: parent, Items: items})
 	}
 
-	// Récents
-	var recItems []Item
-	for _, r := range loadRecents(dirs) {
-		recItems = append(recItems, Item{Name: filepath.Base(r), FullPath: r, Fav: favs[r]})
-	}
-	pages = append(pages, Page{Title: "Récents", Icon: "◷", Kind: KindRecents, Items: recItems})
-
 	return pages
+}
+
+// favorisIndex renvoie l'index de la page Favoris (page d'accueil par défaut).
+func favorisIndex(pages []Page) int {
+	for i, p := range pages {
+		if p.Kind == KindFavoris {
+			return i
+		}
+	}
+	return 0
 }
 
 // --- Mutations ---

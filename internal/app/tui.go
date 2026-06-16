@@ -22,9 +22,9 @@ var (
 	cRed    = lipgloss.Color("167")
 	cBlack  = lipgloss.Color("16")
 
-	stTabActive   = lipgloss.NewStyle().Bold(true).Foreground(cOrange)
-	stTabFocus    = lipgloss.NewStyle().Bold(true).Foreground(cBlack).Background(cOrange)
-	stTabInactive = lipgloss.NewStyle().Foreground(cGray)
+	stTabActive   = lipgloss.NewStyle().Bold(true).Foreground(cOrange).Padding(0, 1)
+	stTabFocus    = lipgloss.NewStyle().Bold(true).Foreground(cBlack).Background(cOrange).Padding(0, 1)
+	stTabInactive = lipgloss.NewStyle().Foreground(cGray).Padding(0, 1)
 	stArrow       = lipgloss.NewStyle().Foreground(cOrange)
 	stSel         = lipgloss.NewStyle().Bold(true).Foreground(cWhite)
 	stNormal      = lipgloss.NewStyle().Foreground(cGray)
@@ -77,6 +77,7 @@ func newModel() model {
 	ti.Width = 50
 	m := model{mode: modeList, focus: focusList, input: ti, height: 24, width: 80}
 	m.pages = buildPages()
+	m.pageIdx = favorisIndex(m.pages) // page d'accueil = Favoris
 	m.clamp()
 	return m
 }
