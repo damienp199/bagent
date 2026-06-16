@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 )
 
 // PageKind distingue les natures de pages.
@@ -294,76 +293,6 @@ func createDir(parent, name string) (string, error) {
 		return "", err
 	}
 	return full, nil
-}
-
-// remapPath réécrit une ligne de config si elle référence old (exact ou préfixe),
-// en conservant l'éventuel préfixe de groupe ">".
-func remapPath(line, old, newp string) string {
-	prefix := ""
-	p := line
-	if strings.HasPrefix(p, ">") {
-		prefix, p = ">", p[1:]
-	}
-	if p == old {
-		return prefix + newp
-	}
-	if strings.HasPrefix(p, old+"/") {
-		return prefix + newp + p[len(old):]
-	}
-	return line
-}
-
-// updatePathRefs met à jour workspaces et favorites après un renommage de dossier.
-func updatePathRefs(old, newp string) {
-	for _, file := range []string{workspacesFile(), favoritesFile()} {
-		lines := readLines(file)
-		changed := false
-		for i, l := range lines {
-			if nl := remapPath(l, old, newp); nl != l {
-				lines[i] = nl
-				changed = true
-			}
-		}
-		if changed {
-			_ = writeLines(file, lines)
-		}
-	}
-}
-
-// trashDir déplace un dossier vers ~/.Trash (jamais rm), en suffixant la date
-// si le nom existe déjà. Met à jour les références config.
-func trashDir(path string) error {
-	home, _ := os.UserHomeDir()
-	trash := filepath.Join(home, ".Trash")
-	if err := os.MkdirAll(trash, 0o755); err != nil {
-		return err
-	}
-	dest := filepath.Join(trash, filepath.Base(path))
-	if _, err := os.Stat(dest); err == nil {
-		dest = filepath.Join(trash, filepath.Base(path)+" "+time.Now().Format("2006-01-02 150405"))
-	}
-	if err := os.Rename(path, dest); err != nil {
-		return err
-	}
-	updatePathRefs(path, dest)
-	return nil
-}
-
-// renameDir renomme un dossier (même parent) et met à jour les références.
-func renameDir(old, newName string) (string, error) {
-	parent := filepath.Dir(old)
-	newPath := filepath.Join(parent, newName)
-	if newPath == old {
-		return old, nil
-	}
-	if isDir(newPath) {
-		return newPath, os.ErrExist
-	}
-	if err := os.Rename(old, newPath); err != nil {
-		return "", err
-	}
-	updatePathRefs(old, newPath)
-	return newPath, nil
 }
 
 // swapEntries échange les positions des lignes x et y. No-op si l'une est

@@ -64,7 +64,7 @@ type model struct {
 	height   int
 
 	mode        uiMode
-	inputAction string // "favPath" | "newProjet" | "newDir" | "rename"
+	inputAction string // "favPath" | "newProjet" | "newDir"
 	input       textinput.Model
 	status      string
 
@@ -248,8 +248,6 @@ func (m model) updateBar(s string) (tea.Model, tea.Cmd) {
 			return m, nil
 		case "s":
 			m.mode = modeDelConfirm
-		case "r":
-			return m, m.startInput("rename", page.Title)
 		case "enter":
 			if err := openFinder(page.Parent); err != nil {
 				m.status = stRed.Render("✗") + " " + err.Error()
@@ -325,9 +323,14 @@ func (m model) updateItems(s string) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	case "f":
-		if it, ok := m.current(); ok && page.Kind != KindFavoris {
-			_ = toggleFavorite(it.FullPath)
-			m.status = stFav.Render("★") + " Favori + " + stDim.Render(it.Name)
+		if it, ok := m.current(); ok {
+			if page.Kind == KindFavoris {
+				_ = removeFavorite(it.FullPath)
+				m.status = stGreen.Render("✓") + " Favori retiré " + stDim.Render(it.Name)
+			} else {
+				_ = toggleFavorite(it.FullPath)
+				m.status = stFav.Render("★") + " Favori + " + stDim.Render(it.Name)
+			}
 			m.reload()
 			return m, clearStatusCmd()
 		}
@@ -335,26 +338,12 @@ func (m model) updateItems(s string) (tea.Model, tea.Cmd) {
 	}
 	switch page.Kind {
 	case KindFavoris:
-		switch s {
-		case "a":
+		if s == "a" {
 			return m, m.startInput("favPath", "")
-		case "s":
-			if _, ok := m.current(); ok {
-				m.mode = modeDelConfirm
-			}
 		}
 	case KindProjet:
-		switch s {
-		case "a":
+		if s == "a" {
 			return m, m.startInput("newDir", "")
-		case "s":
-			if _, ok := m.current(); ok {
-				m.mode = modeDelConfirm
-			}
-		case "r":
-			if it, ok := m.current(); ok {
-				return m, m.startInput("rename", it.Name)
-			}
 		}
 	}
 	return m, nil
@@ -428,41 +417,8 @@ func (m model) applyInput(val string) (tea.Model, tea.Cmd) {
 		m.focus = focusList
 		m.selectByPath(full)
 		return m, clearStatusCmd()
-
-	case "rename":
-		return m.applyRename(val)
 	}
 	return m, nil
-}
-
-func (m model) applyRename(val string) (tea.Model, tea.Cmd) {
-	// Renommage d'un projet (focus barre) ou d'un dossier (focus liste).
-	old := ""
-	isProjet := m.focus == focusBar && m.curPage().Kind == KindProjet
-	if isProjet {
-		old = m.curPage().Parent
-	} else if it, ok := m.current(); ok {
-		old = it.FullPath
-	} else {
-		return m, nil
-	}
-	newPath, err := renameDir(old, val)
-	switch {
-	case err == os.ErrExist:
-		m.status = stRed.Render("✗") + " Existe déjà " + stDim.Render(val)
-	case err != nil:
-		m.status = stRed.Render("✗") + " " + err.Error()
-	default:
-		m.status = stGreen.Render("✓") + " Renommé " + stDim.Render(val)
-	}
-	m.reload()
-	if isProjet {
-		m.gotoProjet(newPath)
-		m.focus = focusBar
-	} else {
-		m.selectByPath(newPath)
-	}
-	return m, clearStatusCmd()
 }
 
 func (m model) updateDelConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -471,18 +427,6 @@ func (m model) updateDelConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if m.focus == focusBar && page.Kind == KindProjet {
 			_ = removeEntry(">" + page.Parent)
 			m.status = stGreen.Render("✓") + " Projet retiré " + stDim.Render(page.Title)
-		} else if it, ok := m.current(); ok {
-			switch page.Kind {
-			case KindFavoris:
-				_ = removeFavorite(it.FullPath)
-				m.status = stGreen.Render("✓") + " Retiré " + stDim.Render(it.Name)
-			case KindProjet:
-				if err := trashDir(it.FullPath); err != nil {
-					m.status = stRed.Render("✗") + " " + err.Error()
-				} else {
-					m.status = stGreen.Render("✓") + " Corbeille " + stDim.Render(it.Name)
-				}
-			}
 		}
 		m.mode = modeList
 		m.reload()

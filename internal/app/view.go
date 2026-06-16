@@ -174,25 +174,12 @@ func inputLabel(action string) string {
 		return "Chemin du projet"
 	case "newDir":
 		return "Nom du dossier"
-	case "rename":
-		return "Renommer en"
 	}
 	return ""
 }
 
 func (m model) delPrompt() string {
-	page := m.curPage()
-	if m.focus == focusBar && page.Kind == KindProjet {
-		return "Retirer le projet " + stSel.Render(page.Title) + " ?"
-	}
-	it, _ := m.current()
-	switch page.Kind {
-	case KindFavoris:
-		return "Retirer le favori " + stSel.Render(it.Name) + " ?"
-	case KindProjet:
-		return "Mettre " + stSel.Render(it.Name) + " à la corbeille ?"
-	}
-	return "Supprimer ?"
+	return "Retirer le projet " + stSel.Render(m.curPage().Title) + " ?"
 }
 
 func (m model) footer() string {
@@ -226,7 +213,7 @@ func (m model) footerKeys() string {
 	if m.focus == focusBar {
 		actions := []string{key("a", "projet")}
 		if page.Kind == KindProjet {
-			actions = append(actions, key("o", "ordre"), key("s", "retirer"), key("r", "renommer"), key("⏎", "finder"))
+			actions = append(actions, key("o", "ordre"), key("s", "retirer"), key("⏎", "finder"))
 		}
 		return strings.Join(actions, dot) + gsep + key("q", "quit")
 	}
@@ -236,9 +223,9 @@ func (m model) footerKeys() string {
 	var actions []string
 	switch page.Kind {
 	case KindFavoris:
-		actions = []string{key("a", "path"), key("s", "retirer")}
+		actions = []string{key("a", "path"), key("f", "retirer")}
 	case KindProjet:
-		actions = []string{key("a", "dossier"), key("s", "suppr"), key("r", "renommer"), key("f", "favori")}
+		actions = []string{key("a", "ajouter"), key("f", "favori")}
 	case KindRecents:
 		actions = []string{key("f", "favori")}
 	}

@@ -96,15 +96,14 @@ func printHelp() {
 
   Sur la barre d'onglets:
     a          nouveau projet (chemin du dossier)
-    s          retirer le projet      r  renommer le projet
+    s          retirer le projet      o  réordonner les onglets
     ⏎          ouvrir le dossier dans le Finder
 
   Dans un projet:
-    a          créer un dossier       r  renommer le dossier
-    s          supprimer (→ corbeille)   f  ajouter aux favoris
+    a          créer un dossier       f  ajouter aux favoris
 
   Dans Favoris:
-    a          ajouter un chemin      s  retirer le favori
+    a          ajouter un chemin      f  retirer le favori
 
   q            quitter`)
 }
