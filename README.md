@@ -64,6 +64,12 @@ Le script télécharge le binaire, le signe (ad-hoc) et l'installe dans `~/.loca
 renommage atomique — ce qui évite le `zsh: killed` dû au cache de signature du noyau
 lors d'un remplacement de binaire en place. Assure-toi que `~/.local/bin` est dans ton `PATH`.
 
+### Via un agent (LLM)
+
+Si tu demandes à un agent (Claude Code, Codex…) d'installer bagent en lui pointant ce repo,
+il trouve ses consignes dans [`AGENTS.md`](AGENTS.md) : la commande d'install et les pièges
+macOS à éviter (notamment le renommage atomique qui prévient le `zsh: killed`).
+
 ### Depuis les sources (dev)
 
 Nécessite [Go](https://go.dev/). Lancé depuis un clone, le même script compile au lieu de télécharger :
