@@ -211,7 +211,7 @@ func (m model) footerKeys() string {
 
 	// Barre : pas de flèches (nav évidente).
 	if m.focus == focusBar {
-		actions := []string{key("a", "projet")}
+		actions := []string{key("a", "ajouter")}
 		if page.Kind == KindProjet {
 			actions = append(actions, key("o", "ordre"), key("s", "retirer"), key("⏎", "finder"))
 		}

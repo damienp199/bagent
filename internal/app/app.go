@@ -95,12 +95,12 @@ func printHelp() {
     ⏎ c x      ouvrir (VSCode / claude / codex)
 
   Sur la barre d'onglets:
-    a          nouveau projet (chemin du dossier)
+    a          ajouter un projet (chemin du dossier)
     s          retirer le projet      o  réordonner les onglets
     ⏎          ouvrir le dossier dans le Finder
 
   Dans un projet:
-    a          créer un dossier       f  ajouter aux favoris
+    a          ajouter un dossier     f  ajouter aux favoris
 
   Dans Favoris:
     a          ajouter un chemin      f  retirer le favori
