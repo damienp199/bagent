@@ -269,18 +269,47 @@ func (m model) updateBar(s string) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// updateReorder : mode « ordre », ←/→ déplacent l'onglet projet courant.
+// updateReorder : mode « ordre ». Sur la liste des favoris, ↑/↓ déplacent le
+// favori sélectionné ; sur la barre, ←/→ déplacent l'onglet projet courant.
 func (m model) updateReorder(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
+	s := msg.String()
+	switch s {
 	case "ctrl+c", "q":
 		return m, tea.Quit
 	case "esc", "enter", "o":
 		m.mode = modeList
 		return m, nil
+	}
+	if m.focus == focusList && m.curPage().Kind == KindFavoris {
+		switch s {
+		case "up":
+			return m.moveCurrentFavorite(-1)
+		case "down":
+			return m.moveCurrentFavorite(+1)
+		}
+		return m, nil
+	}
+	switch s {
 	case "left", "h":
 		return m.moveCurrentProject(-1)
 	case "right", "l":
 		return m.moveCurrentProject(+1)
+	}
+	return m, nil
+}
+
+// moveCurrentFavorite déplace le favori sélectionné d'une position et fait
+// suivre la sélection.
+func (m model) moveCurrentFavorite(dir int) (tea.Model, tea.Cmd) {
+	items := m.curPage().Items
+	j := m.selected + dir
+	if j < 0 || j >= len(items) {
+		return m, nil // bord (haut/bas de liste)
+	}
+	cur := items[m.selected].FullPath
+	if swapFavorites(cur, items[j].FullPath) {
+		m.reload()
+		m.selectByPath(cur)
 	}
 	return m, nil
 }
@@ -347,8 +376,14 @@ func (m model) updateItems(s string) (tea.Model, tea.Cmd) {
 	}
 	switch page.Kind {
 	case KindFavoris:
-		if s == "a" {
+		switch s {
+		case "a":
 			return m, m.startInput("favPath", "")
+		case "o":
+			if len(page.Items) > 0 {
+				m.mode = modeReorder
+			}
+			return m, nil
 		}
 	case KindProjet:
 		if s == "a" {

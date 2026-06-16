@@ -67,7 +67,7 @@ func (m model) renderTabs(width int) string {
 	var parts []string
 	for i := start; i < end; i++ {
 		switch {
-		case i == m.pageIdx && m.mode == modeReorder:
+		case i == m.pageIdx && m.mode == modeReorder && m.focus == focusBar:
 			parts = append(parts, stArrow.Render("‹")+activeStyle.Render(labels[i])+stArrow.Render("›"))
 		case i == m.pageIdx:
 			parts = append(parts, activeStyle.Render(labels[i]))
@@ -106,6 +106,9 @@ func (m model) renderItem(i int, it Item, page Page) string {
 	}
 	if selected && m.mode == modeDelConfirm {
 		return "  " + stRed.Render("❯ "+it.Name) + fav
+	}
+	if selected && m.mode == modeReorder {
+		return "  " + stArrow.Render("↕") + " " + stSel.Render(it.Name) + fav
 	}
 	if selected {
 		return "  " + stArrow.Render("❯") + " " + stSel.Render(it.Name) + fav
@@ -204,9 +207,13 @@ func (m model) footerKeys() string {
 	gsep := stFooter.Render("   ") // séparateur entre groupes
 	page := m.curPage()
 
-	// Mode ordre : déplacement de l'onglet.
+	// Mode ordre : déplacement de l'onglet (projet) ou du favori (liste).
 	if m.mode == modeReorder {
-		return key("‹/›", "déplacer") + dot + key("⏎/échap", "terminer") + gsep + key("q", "quit")
+		arrows := "‹/›"
+		if m.focus == focusList && page.Kind == KindFavoris {
+			arrows = "↑/↓"
+		}
+		return key(arrows, "déplacer") + dot + key("⏎/échap", "terminer") + gsep + key("q", "quit")
 	}
 
 	// Barre : pas de flèches (nav évidente).
@@ -223,7 +230,7 @@ func (m model) footerKeys() string {
 	var actions []string
 	switch page.Kind {
 	case KindFavoris:
-		actions = []string{key("a", "ajouter"), key("f", "retirer")}
+		actions = []string{key("a", "ajouter"), key("f", "retirer"), key("o", "ordre")}
 	case KindProjet:
 		actions = []string{key("a", "ajouter"), key("f", "favori")}
 	case KindRecents:

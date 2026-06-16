@@ -326,6 +326,17 @@ func swapProjects(a, b string) bool {
 	return writeLines(workspacesFile(), swapped) == nil
 }
 
+// swapFavorites échange les positions des deux favoris a et b dans le fichier
+// favorites. Renvoie true si l'ordre a changé.
+func swapFavorites(a, b string) bool {
+	lines := loadFavorites()
+	swapped := swapEntries(lines, a, b)
+	if strings.Join(swapped, "\n") == strings.Join(lines, "\n") {
+		return false
+	}
+	return writeLines(favoritesFile(), swapped) == nil
+}
+
 // pruneDeadFile retire d'un fichier de chemins les lignes pointant vers un
 // dossier inexistant, en conservant l'éventuel préfixe ">". true si modifié.
 func pruneDeadFile(path string) bool {
