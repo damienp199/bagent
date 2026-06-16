@@ -366,6 +366,67 @@ func renameDir(old, newName string) (string, error) {
 	return newPath, nil
 }
 
+// swapEntries échange les positions des lignes x et y. No-op si l'une est
+// absente. Fonction pure (espace des lignes du fichier).
+func swapEntries(lines []string, x, y string) []string {
+	ix, iy := -1, -1
+	for k, l := range lines {
+		switch l {
+		case x:
+			ix = k
+		case y:
+			iy = k
+		}
+	}
+	if ix < 0 || iy < 0 || ix == iy {
+		return lines
+	}
+	out := append([]string(nil), lines...)
+	out[ix], out[iy] = out[iy], out[ix]
+	return out
+}
+
+// swapProjects échange les positions des deux projets a et b dans le fichier
+// workspaces. Renvoie true si l'ordre a changé.
+func swapProjects(a, b string) bool {
+	lines := loadDirs()
+	swapped := swapEntries(lines, ">"+a, ">"+b)
+	if strings.Join(swapped, "\n") == strings.Join(lines, "\n") {
+		return false
+	}
+	return writeLines(workspacesFile(), swapped) == nil
+}
+
+// pruneDeadFile retire d'un fichier de chemins les lignes pointant vers un
+// dossier inexistant, en conservant l'éventuel préfixe ">". true si modifié.
+func pruneDeadFile(path string) bool {
+	lines := readLines(path)
+	kept := make([]string, 0, len(lines))
+	for _, l := range lines {
+		if isDir(strings.TrimPrefix(l, ">")) {
+			kept = append(kept, l)
+		}
+	}
+	if len(kept) == len(lines) {
+		return false
+	}
+	_ = writeLines(path, kept)
+	return true
+}
+
+// pruneDeadEntries purge les entrées mortes (dossier déplacé ou supprimé) de
+// tous les fichiers de chemins persistés. Les récents sont filtrés
+// dynamiquement à chaque build, donc rien à purger côté persistance.
+func pruneDeadEntries() bool {
+	changed := false
+	for _, f := range []string{workspacesFile(), favoritesFile()} {
+		if pruneDeadFile(f) {
+			changed = true
+		}
+	}
+	return changed
+}
+
 // addFavorite ajoute un chemin aux favoris s'il est absent.
 func addFavorite(path string) (bool, error) {
 	favs := loadFavorites()
