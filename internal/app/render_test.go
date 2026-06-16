@@ -26,8 +26,8 @@ func TestTabsUppercaseAndGroupFooter(t *testing.T) {
 	if title := strings.ToUpper(m.curPage().Title); !strings.Contains(out, title) {
 		t.Errorf("nom du projet en majuscules absent (%q):\n%s", title, out)
 	}
-	if !strings.Contains(out, "dossier") {
-		t.Errorf("footer page projet sans dossier:\n%s", out)
+	if !strings.Contains(out, "ajouter") {
+		t.Errorf("footer page projet sans action ajouter:\n%s", out)
 	}
 }
 
