@@ -87,7 +87,7 @@ func printHelp() {
     bagent -d       Ouvrir le premier workspace (VSCode)
     bagent --help   Afficher cette aide
 
-  Onglets : Favoris · Projets · Récents
+  Onglets : Favoris · Projets
 
   Navigation:
     ←→ / h l   changer d'onglet

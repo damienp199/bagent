@@ -22,7 +22,7 @@ func (m model) renderTabs(width int) string {
 	labels := make([]string, len(m.pages))
 	widths := make([]int, len(m.pages))
 	for i, p := range m.pages {
-		// Favoris/Récents : icône seule. Projets : nom en majuscules.
+		// Favoris : icône seule. Projets : nom en majuscules.
 		lab := strings.ToUpper(p.Title)
 		if p.Icon != "" {
 			lab = p.Icon

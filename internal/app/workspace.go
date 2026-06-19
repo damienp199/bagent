@@ -251,8 +251,7 @@ func pruneDeadFile(path string) bool {
 }
 
 // pruneDeadEntries purge les entrées mortes (dossier déplacé ou supprimé) de
-// tous les fichiers de chemins persistés. Les récents sont filtrés
-// dynamiquement à chaque build, donc rien à purger côté persistance.
+// tous les fichiers de chemins persistés.
 func pruneDeadEntries() bool {
 	changed := false
 	for _, f := range []string{workspacesFile(), favoritesFile()} {
