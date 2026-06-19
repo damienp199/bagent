@@ -36,17 +36,16 @@ func TestReorderSkipsDeadProjects(t *testing.T) {
 	}
 }
 
-// reorderModel construit un model en mémoire (sans I/O) : Récents, Favoris,
-// puis deux projets, le focus en haut sur le premier projet.
+// reorderModel construit un model en mémoire (sans I/O) : Favoris, puis deux
+// projets, le focus en haut sur le premier projet.
 func reorderModel() model {
 	m := model{mode: modeList, focus: focusBar, width: 100, height: 30}
 	m.pages = []Page{
-		{Title: "Récents", Icon: "◷", Kind: KindRecents},
 		{Title: "Favoris", Icon: "★", Kind: KindFavoris},
 		{Title: "alpha", Kind: KindProjet, Parent: "/p/alpha"},
 		{Title: "beta", Kind: KindProjet, Parent: "/p/beta"},
 	}
-	m.pageIdx = 2
+	m.pageIdx = 1
 	return m
 }
 
@@ -64,7 +63,7 @@ func TestReorderModeToggle(t *testing.T) {
 
 func TestReorderModeIgnoredOnFavoris(t *testing.T) {
 	m := reorderModel()
-	m.pageIdx = 1 // Favoris
+	m.pageIdx = 0 // Favoris
 	m = press(m, "o")
 	if m.mode == modeReorder {
 		t.Fatal("'o' ne devrait pas activer le mode ordre sur Favoris")

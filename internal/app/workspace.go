@@ -13,7 +13,6 @@ type PageKind int
 const (
 	KindFavoris PageKind = iota
 	KindProjet
-	KindRecents
 )
 
 // Item est un workspace ouvrable affiché dans une page.
@@ -31,8 +30,6 @@ type Page struct {
 	Parent string // chemin du dossier parent (pages de groupe)
 	Items  []Item
 }
-
-const maxRecents = 8
 
 func configDir() string {
 	home, _ := os.UserHomeDir()
@@ -91,111 +88,11 @@ func loadSubdirs(parent string) []string {
 	return subdirs
 }
 
-// resolveClaudePath convertit un nom de dossier encodé par Claude en chemin réel.
-func resolveClaudePath(encoded string) string {
-	encoded = strings.TrimPrefix(encoded, "-")
-	parts := strings.Split(encoded, "-")
-	path := ""
-	i := 0
-	for i < len(parts) {
-		candidate := path + "/" + parts[i]
-		if isDir(candidate) {
-			path = candidate
-			i++
-			continue
-		}
-		found := false
-		for j := i + 1; j < len(parts); j++ {
-			mergedDash := parts[i]
-			mergedSpace := parts[i]
-			for k := i + 1; k <= j; k++ {
-				mergedDash += "-" + parts[k]
-				mergedSpace += " " + parts[k]
-			}
-			if isDir(path + "/" + mergedDash) {
-				path = path + "/" + mergedDash
-				i = j + 1
-				found = true
-				break
-			} else if isDir(path + "/" + mergedSpace) {
-				path = path + "/" + mergedSpace
-				i = j + 1
-				found = true
-				break
-			}
-		}
-		if !found {
-			return ""
-		}
-	}
-	return path
-}
-
-// loadRecents lit ~/.claude/projects par date décroissante, en excluant le home
-// et les workspaces déjà épinglés (directs ou sous un groupe).
-func loadRecents(dirs []string) []string {
-	home, _ := os.UserHomeDir()
-	projects := filepath.Join(home, ".claude", "projects")
-	entries, err := os.ReadDir(projects)
-	if err != nil {
-		return nil
-	}
-	type ent struct {
-		name    string
-		modTime int64
-	}
-	var list []ent
-	for _, e := range entries {
-		info, err := e.Info()
-		if err != nil {
-			continue
-		}
-		list = append(list, ent{e.Name(), info.ModTime().UnixNano()})
-	}
-	sort.Slice(list, func(i, j int) bool { return list[i].modTime > list[j].modTime })
-
-	var recents []string
-	for _, e := range list {
-		realPath := resolveClaudePath(e.name)
-		if realPath == "" || !isDir(realPath) || realPath == home {
-			continue
-		}
-		already := false
-		for _, d := range dirs {
-			if d == realPath {
-				already = true
-				break
-			}
-			if strings.HasPrefix(d, ">") {
-				parent := strings.TrimPrefix(d, ">")
-				if strings.HasPrefix(realPath, parent+"/") {
-					already = true
-					break
-				}
-			}
-		}
-		if already {
-			continue
-		}
-		recents = append(recents, realPath)
-		if len(recents) >= maxRecents {
-			break
-		}
-	}
-	return recents
-}
-
 // buildPages construit les pages dans l'ordre des onglets :
-// ◷ Récents · ★ Favoris · un projet par page.
+// ★ Favoris · un projet par page.
 func buildPages() []Page {
 	dirs := loadDirs()
 	favs := favoriteSet()
-
-	// Récents (à gauche)
-	var recItems []Item
-	for _, r := range loadRecents(dirs) {
-		recItems = append(recItems, Item{Name: filepath.Base(r), FullPath: r, Fav: favs[r]})
-	}
 
 	// Favoris
 	var favItems []Item
@@ -207,7 +104,6 @@ func buildPages() []Page {
 	}
 
 	pages := []Page{
-		{Title: "Récents", Icon: "◷", Kind: KindRecents, Items: recItems},
 		{Title: "Favoris", Icon: "★", Kind: KindFavoris, Items: favItems},
 	}
 

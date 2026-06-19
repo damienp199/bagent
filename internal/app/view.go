@@ -91,8 +91,6 @@ func emptyMessage(kind PageKind) string {
 	switch kind {
 	case KindFavoris:
 		return "Aucun favori — a pour ajouter un chemin, f depuis un projet"
-	case KindRecents:
-		return "Aucun récent"
 	default:
 		return "Projet vide — a pour créer un dossier"
 	}
@@ -233,8 +231,6 @@ func (m model) footerKeys() string {
 		actions = []string{key("a", "ajouter"), key("f", "retirer"), key("o", "ordre")}
 	case KindProjet:
 		actions = []string{key("a", "ajouter"), key("f", "favori")}
-	case KindRecents:
-		actions = []string{key("f", "favori")}
 	}
 	groups := []string{open}
 	if len(actions) > 0 {
