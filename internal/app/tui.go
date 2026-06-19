@@ -21,17 +21,20 @@ const refreshInterval = 1500 * time.Millisecond
 // --- Styles ---
 var (
 	cOrange = lipgloss.Color("208")
-	cWhite  = lipgloss.Color("231")
 	cGray   = lipgloss.Color("243")
 	cGreen  = lipgloss.Color("107")
 	cRed    = lipgloss.Color("167")
 	cBlack  = lipgloss.Color("16")
 
+	// Texte de l'item sélectionné : noir sur terminal clair, blanc sur terminal
+	// sombre. Évite le texte blanc invisible sur fond clair.
+	cSel = lipgloss.AdaptiveColor{Light: "16", Dark: "231"}
+
 	stTabActive   = lipgloss.NewStyle().Bold(true).Foreground(cOrange).Padding(0, 1)
 	stTabFocus    = lipgloss.NewStyle().Bold(true).Foreground(cBlack).Background(cOrange).Padding(0, 1)
 	stTabInactive = lipgloss.NewStyle().Foreground(cGray).Padding(0, 1)
 	stArrow       = lipgloss.NewStyle().Foreground(cOrange)
-	stSel         = lipgloss.NewStyle().Bold(true).Foreground(cWhite)
+	stSel         = lipgloss.NewStyle().Bold(true).Foreground(cSel)
 	stNormal      = lipgloss.NewStyle().Foreground(cGray)
 	stFav         = lipgloss.NewStyle().Foreground(cOrange)
 	stDim         = lipgloss.NewStyle().Faint(true)
