@@ -301,10 +301,11 @@ func (m model) updateBar(s string) (tea.Model, tea.Cmd) {
 	page := m.curPage()
 	switch s {
 	case "down", "j":
-		if len(page.Items) > 0 {
-			m.focus = focusList
-			m.selected = 0
-		}
+		// Toujours descendre dans la liste, même vide : c'est là qu'on ajoute
+		// un item (a) au groupe courant. Bloquer ici piégeait l'utilisateur sur
+		// la barre, où a crée un projet au lieu d'un item.
+		m.focus = focusList
+		m.selected = 0
 		return m, nil
 	case "a":
 		return m, m.startInput("newProjet", "")

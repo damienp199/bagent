@@ -46,6 +46,23 @@ func press(m model, s string) model {
 	return nm.(model)
 }
 
+// Sur une page vide, depuis la barre, ↓ doit donner le focus à la liste pour
+// permettre l'ajout d'un item (a) — sinon on reste bloqué sur la barre où a
+// crée un projet au lieu d'un item dans le groupe.
+func TestEnterEmptyPageFromBar(t *testing.T) {
+	m := model{
+		pages:  []Page{{Title: "Vide", Kind: KindProjet, Parent: "/tmp/vide"}},
+		mode:   modeList,
+		focus:  focusBar,
+		width:  100,
+		height: 30,
+	}
+	m = press(m, "down")
+	if m.focus != focusList {
+		t.Fatalf("↓ sur page vide devrait passer en focusList, focus=%v", m.focus)
+	}
+}
+
 func TestNavigateToPopulatedPage(t *testing.T) {
 	m := newModel()
 	m.width, m.height = 100, 30
