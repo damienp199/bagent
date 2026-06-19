@@ -12,7 +12,6 @@ Tes workspaces sont organisés en **onglets** :
 
 - **★ Favoris** — accès express, tu y épingles n'importe quel dossier.
 - **Projets** — un onglet par dossier parent ; chaque onglet liste ses sous-dossiers.
-- **◷ Récents** — les derniers projets ouverts dans Claude Code (`~/.claude/projects`).
 
 La navigation a **deux niveaux** :
 
