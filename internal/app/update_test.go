@@ -101,6 +101,9 @@ func TestUpdateCommandString(t *testing.T) {
 	if !strings.Contains(got, "install.sh") || !strings.Contains(got, "curl -fsSL") {
 		t.Fatalf("updateShellCmd = %q ; doit lancer install.sh via curl", got)
 	}
+	if !strings.Contains(got, "https://raw.githubusercontent.com/damienp199/bagent/main/install.sh") {
+		t.Fatalf("updateShellCmd = %q ; doit pointer l'URL canonique de install.sh", got)
+	}
 }
 
 func TestFooterShowsUpdateNotice(t *testing.T) {
