@@ -143,3 +143,9 @@ func checkForUpdate(now int64, fetch func(string) ([]byte, error)) string {
 	}
 	return ""
 }
+
+// updateShellCmd renvoie la commande shell qui (ré)installe bagent depuis la
+// dernière release, isolée pour être testable sans exécution.
+func updateShellCmd() string {
+	return "curl -fsSL https://raw.githubusercontent.com/damienp199/bagent/main/install.sh | sh"
+}

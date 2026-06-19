@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -15,6 +16,12 @@ func Run() {
 			return
 		case "-d":
 			runDefault()
+			return
+		case "--update", "-u":
+			runUpdate()
+			return
+		case "--version", "-v":
+			fmt.Println("  bagent", version)
 			return
 		}
 	}
@@ -45,6 +52,16 @@ func execAction(action, target string) {
 			fmt.Fprintln(os.Stderr, "  ✗", err)
 			os.Exit(1)
 		}
+	}
+}
+
+// runUpdate réinstalle bagent via install.sh (download + re-signature + mv
+// atomique). La sortie est transmise au terminal.
+func runUpdate() {
+	c := exec.Command("sh", "-c", updateShellCmd())
+	c.Stdout, c.Stderr, c.Stdin = os.Stdout, os.Stderr, os.Stdin
+	if err := c.Run(); err != nil {
+		os.Exit(1)
 	}
 }
 
@@ -86,6 +103,8 @@ func printHelp() {
     bagent          Ouvrir le menu
     bagent -d       Ouvrir le premier workspace (VSCode)
     bagent --help   Afficher cette aide
+    bagent --update Mettre à jour vers la dernière version
+    bagent --version Afficher la version
 
   Onglets : Favoris · Projets
 

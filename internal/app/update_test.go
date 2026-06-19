@@ -96,6 +96,13 @@ func TestCheckForUpdate(t *testing.T) {
 	}
 }
 
+func TestUpdateCommandString(t *testing.T) {
+	got := updateShellCmd()
+	if !strings.Contains(got, "install.sh") || !strings.Contains(got, "curl -fsSL") {
+		t.Fatalf("updateShellCmd = %q ; doit lancer install.sh via curl", got)
+	}
+}
+
 func TestFooterShowsUpdateNotice(t *testing.T) {
 	m := model{
 		pages:     []Page{{Title: "Favoris", Icon: "★", Kind: KindFavoris}},
