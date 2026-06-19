@@ -120,10 +120,19 @@ func TestFooterShowsUpdateNotice(t *testing.T) {
 		t.Fatalf("le footer devrait annoncer la mise à jour :\n%s", out)
 	}
 
-	// Un status ponctuel a priorité et masque la notif.
+	// La notif occupe sa propre ligne, au-dessus des raccourcis.
+	lines := strings.Split(strings.Trim(out, "\n"), "\n")
+	if len(lines) < 2 || !strings.Contains(lines[0], "v0.1.9") {
+		t.Fatalf("la notif doit être sur la ligne du dessus :\n%s", out)
+	}
+	if strings.Contains(lines[0], "ouvrir") {
+		t.Fatalf("la notif ne doit pas partager la ligne des raccourcis :\n%s", out)
+	}
+
+	// Un status ponctuel s'affiche en dessous sans masquer la notif.
 	m.status = "✓ Fait"
 	out = stripANSI(m.footer())
-	if strings.Contains(out, "bagent --update") {
-		t.Fatalf("le status doit masquer la notif :\n%s", out)
+	if !strings.Contains(out, "bagent --update") || !strings.Contains(out, "Fait") {
+		t.Fatalf("notif et status doivent coexister :\n%s", out)
 	}
 }

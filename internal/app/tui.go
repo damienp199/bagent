@@ -43,6 +43,7 @@ var (
 	stFooter      = lipgloss.NewStyle().Foreground(cGray)
 	stKey         = lipgloss.NewStyle().Faint(true)
 	stSep         = lipgloss.NewStyle().Foreground(cGray).Faint(true)
+	stUpdate      = lipgloss.NewStyle().Bold(true).Foreground(cOrange)
 )
 
 type uiMode int

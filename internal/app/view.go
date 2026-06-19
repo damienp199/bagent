@@ -130,7 +130,11 @@ func (m model) View() string {
 		}
 	}
 
-	avail := m.height - reservedLines
+	reserved := reservedLines
+	if m.updateTag != "" {
+		reserved++ // la notif de mise à jour occupe une ligne supplémentaire
+	}
+	avail := m.height - reserved
 	if avail < 3 {
 		avail = 3
 	}
@@ -190,15 +194,20 @@ func (m model) footer() string {
 	case modeDelConfirm:
 		return "\n  " + stArrow.Render("›") + " " + m.delPrompt() + " " + stKey.Render("(o/n)")
 	default:
+		bottom := m.footerKeys()
 		if m.status != "" {
-			return "\n  " + m.status
+			bottom = m.status
 		}
-		keys := m.footerKeys()
+		// Notif de mise à jour : ligne dédiée au-dessus des raccourcis, alignée à
+		// gauche et bien visible. Le status ponctuel s'affiche en dessous sans la
+		// masquer (lignes distinctes).
 		if m.updateTag != "" {
-			keys += stFooter.Render("   ") + stFav.Render("●") +
-				stFooter.Render(" "+m.updateTag+" dispo · ") + stKey.Render("bagent --update")
+			notice := stFav.Render("●") + " " +
+				stUpdate.Render(m.updateTag+" disponible") +
+				stDim.Render(" · bagent --update")
+			return "\n  " + notice + "\n  " + bottom
 		}
-		return "\n  " + keys
+		return "\n  " + bottom
 	}
 }
 
