@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -92,5 +93,27 @@ func TestCheckForUpdate(t *testing.T) {
 	os.RemoveAll(updateCacheFile())
 	if got := checkForUpdate(99999999, boom); got != "" {
 		t.Fatalf("checkForUpdate (erreur) = %q ; veut \"\"", got)
+	}
+}
+
+func TestFooterShowsUpdateNotice(t *testing.T) {
+	m := model{
+		pages:     []Page{{Title: "Favoris", Icon: "★", Kind: KindFavoris}},
+		mode:      modeList,
+		focus:     focusList,
+		width:     100,
+		height:    30,
+		updateTag: "v0.1.9",
+	}
+	out := stripANSI(m.footer())
+	if !strings.Contains(out, "v0.1.9") || !strings.Contains(out, "bagent --update") {
+		t.Fatalf("le footer devrait annoncer la mise à jour :\n%s", out)
+	}
+
+	// Un status ponctuel a priorité et masque la notif.
+	m.status = "✓ Fait"
+	out = stripANSI(m.footer())
+	if strings.Contains(out, "bagent --update") {
+		t.Fatalf("le status doit masquer la notif :\n%s", out)
 	}
 }

@@ -193,7 +193,12 @@ func (m model) footer() string {
 		if m.status != "" {
 			return "\n  " + m.status
 		}
-		return "\n  " + m.footerKeys()
+		keys := m.footerKeys()
+		if m.updateTag != "" {
+			keys += stFooter.Render("   ") + stFav.Render("●") +
+				stFooter.Render(" "+m.updateTag+" dispo · ") + stKey.Render("bagent --update")
+		}
+		return "\n  " + keys
 	}
 }
 

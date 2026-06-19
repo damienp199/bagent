@@ -80,6 +80,8 @@ type model struct {
 
 	action string // résultat à exécuter après la sortie
 	target string
+
+	updateTag string // tag d'une mise à jour disponible ("" sinon)
 }
 
 func newModel() model {
@@ -214,7 +216,7 @@ func (m *model) startInput(action, val string) tea.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Init() tea.Cmd { return refreshCmd() }
+func (m model) Init() tea.Cmd { return tea.Batch(refreshCmd(), updateCheckCmd()) }
 
 func clearStatusCmd() tea.Cmd {
 	return tea.Tick(statusDelay, func(t time.Time) tea.Msg { return clearStatusMsg{} })
@@ -222,6 +224,14 @@ func clearStatusCmd() tea.Cmd {
 
 func refreshCmd() tea.Cmd {
 	return tea.Tick(refreshInterval, func(t time.Time) tea.Msg { return refreshMsg{} })
+}
+
+type updateAvailableMsg struct{ tag string }
+
+func updateCheckCmd() tea.Cmd {
+	return func() tea.Msg {
+		return updateAvailableMsg{tag: checkForUpdate(time.Now().Unix(), httpFetch)}
+	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -239,6 +249,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.reloadPreserving()
 		}
 		return m, refreshCmd()
+	case updateAvailableMsg:
+		m.updateTag = msg.tag
+		return m, nil
 	case tea.KeyMsg:
 		switch m.mode {
 		case modeInput:
