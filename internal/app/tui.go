@@ -13,6 +13,11 @@ import (
 
 const statusDelay = 1500 * time.Millisecond
 
+// refreshInterval : période de relecture du disque pour refléter les
+// changements externes (dossiers créés/supprimés depuis le Finder ou un autre
+// terminal) sans relancer l'app.
+const refreshInterval = 1500 * time.Millisecond
+
 // --- Styles ---
 var (
 	cOrange = lipgloss.Color("208")
@@ -55,6 +60,8 @@ const (
 
 type clearStatusMsg struct{}
 
+type refreshMsg struct{}
+
 type model struct {
 	pages    []Page
 	pageIdx  int
@@ -88,6 +95,44 @@ func (m *model) reload() {
 	m.pages = buildPages()
 	m.clamp()
 }
+
+// locatePage renvoie l'index de la page identifiée par (kind, parent), ou -1.
+func locatePage(pages []Page, kind PageKind, parent string) int {
+	for i, p := range pages {
+		if p.Kind == kind && p.Parent == parent {
+			return i
+		}
+	}
+	return -1
+}
+
+// reapplyPages remplace les pages en préservant autant que possible la position
+// de l'utilisateur : l'onglet courant est suivi par identité (nature + parent)
+// et l'item sélectionné par chemin. Repli sur Favoris si l'onglet a disparu ;
+// sélection clampée si l'item a disparu.
+func (m *model) reapplyPages(pages []Page) {
+	prevKind := m.curPage().Kind
+	prevParent := m.curPage().Parent
+	prevPath := ""
+	if it, ok := m.current(); ok {
+		prevPath = it.FullPath
+	}
+
+	m.pages = pages
+	m.pageIdx = locatePage(pages, prevKind, prevParent)
+	if m.pageIdx < 0 {
+		m.pageIdx = favorisIndex(pages)
+	}
+	m.selected = 0
+	if prevPath != "" {
+		m.selectByPath(prevPath)
+	}
+	m.clamp()
+}
+
+// reloadPreserving relit le disque et réapplique les pages sans perdre la
+// position courante.
+func (m *model) reloadPreserving() { m.reapplyPages(buildPages()) }
 
 func (m *model) clamp() {
 	if len(m.pages) == 0 {
@@ -166,10 +211,14 @@ func (m *model) startInput(action, val string) tea.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return refreshCmd() }
 
 func clearStatusCmd() tea.Cmd {
 	return tea.Tick(statusDelay, func(t time.Time) tea.Msg { return clearStatusMsg{} })
+}
+
+func refreshCmd() tea.Cmd {
+	return tea.Tick(refreshInterval, func(t time.Time) tea.Msg { return refreshMsg{} })
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -180,6 +229,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case clearStatusMsg:
 		m.status = ""
 		return m, nil
+	case refreshMsg:
+		// Reflète les changements externes, mais jamais pendant une saisie,
+		// un réordonnancement ou une confirmation (positions volatiles).
+		if m.mode == modeList {
+			m.reloadPreserving()
+		}
+		return m, refreshCmd()
 	case tea.KeyMsg:
 		switch m.mode {
 		case modeInput:
