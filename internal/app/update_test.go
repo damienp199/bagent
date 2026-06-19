@@ -1,6 +1,10 @@
 package app
 
-import "testing"
+import (
+	"errors"
+	"os"
+	"testing"
+)
 
 func TestParseSemver(t *testing.T) {
 	got, ok := parseSemver("v0.1.2")
@@ -33,5 +37,60 @@ func TestIsNewer(t *testing.T) {
 		if got := isNewer(c.latest, c.current); got != c.want {
 			t.Errorf("isNewer(%q,%q) = %v ; veut %v", c.latest, c.current, got, c.want)
 		}
+	}
+}
+
+func TestLatestRelease(t *testing.T) {
+	fetch := func(string) ([]byte, error) {
+		return []byte(`{"tag_name":"v0.1.5","name":"v0.1.5"}`), nil
+	}
+	tag, err := latestRelease(fetch)
+	if err != nil || tag != "v0.1.5" {
+		t.Fatalf("latestRelease = %q,%v ; veut v0.1.5,nil", tag, err)
+	}
+
+	boom := func(string) ([]byte, error) { return nil, errors.New("réseau") }
+	if _, err := latestRelease(boom); err == nil {
+		t.Fatal("latestRelease devrait propager l'erreur de fetch")
+	}
+
+	empty := func(string) ([]byte, error) { return []byte(`{}`), nil }
+	if _, err := latestRelease(empty); err == nil {
+		t.Fatal("latestRelease devrait échouer sur tag_name vide")
+	}
+}
+
+func TestCheckForUpdate(t *testing.T) {
+	t.Setenv("HOME", t.TempDir()) // isole le cache (~/.config/bagent)
+	version = "v0.1.2"
+	t.Cleanup(func() { version = "dev" })
+
+	fetch := func(string) ([]byte, error) {
+		return []byte(`{"tag_name":"v0.1.5"}`), nil
+	}
+
+	// 1er appel : pas de cache → fetch, notif attendue.
+	if got := checkForUpdate(1000, fetch); got != "v0.1.5" {
+		t.Fatalf("checkForUpdate (frais) = %q ; veut v0.1.5", got)
+	}
+
+	// 2e appel < 24h plus tard : sert le cache même si le fetch planterait.
+	boom := func(string) ([]byte, error) { return nil, errors.New("réseau") }
+	if got := checkForUpdate(2000, boom); got != "v0.1.5" {
+		t.Fatalf("checkForUpdate (caché) = %q ; veut v0.1.5 (cache)", got)
+	}
+
+	// > 24h plus tard : cache périmé → re-fetch.
+	older := func(string) ([]byte, error) {
+		return []byte(`{"tag_name":"v0.1.1"}`), nil
+	}
+	if got := checkForUpdate(1000+86401, older); got != "" {
+		t.Fatalf("checkForUpdate (périmé, v0.1.1 <= v0.1.2) = %q ; veut \"\"", got)
+	}
+
+	// Erreur réseau sans cache valide → silencieux.
+	os.RemoveAll(updateCacheFile())
+	if got := checkForUpdate(99999999, boom); got != "" {
+		t.Fatalf("checkForUpdate (erreur) = %q ; veut \"\"", got)
 	}
 }
