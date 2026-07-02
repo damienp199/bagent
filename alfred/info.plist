@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>com.damienpugin.bagent</string>
+	<key>category</key>
+	<string>Tools</string>
+	<key>connections</key>
+	<dict>
+		<key>AAAA1111-1111-1111-1111-111111111111</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>BBBB2222-2222-2222-2222-222222222222</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>CCCC3333-3333-3333-3333-333333333333</string>
+				<key>modifiers</key>
+				<integer>1048576</integer>
+				<key>modifiersubtext</key>
+				<string>Ouvrir dans Claude Code</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>DDDD4444-4444-4444-4444-444444444444</string>
+				<key>modifiers</key>
+				<integer>524288</integer>
+				<key>modifiersubtext</key>
+				<string>Ouvrir dans Codex</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Damien Pugin</string>
+	<key>description</key>
+	<string>Ouvre un workspace bagent dans VSCode (↵), Claude Code (⌘↵) ou Codex (⌥↵).</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>bagent</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<true/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>ba</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>runningsubtext</key>
+				<string>Chargement des workspaces…</string>
+				<key>script</key>
+				<string>PATH="$HOME/.local/bin:$PATH" bagent alfred</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Ouvrir un workspace</string>
+				<key>title</key>
+				<string>Workspaces bagent</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>AAAA1111-1111-1111-1111-111111111111</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>PATH="$HOME/.local/bin:$PATH" bagent open --tool=code "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>BBBB2222-2222-2222-2222-222222222222</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>command</key>
+				<string>cd "{query}" &amp;&amp; exec claude</string>
+				<key>escaping</key>
+				<integer>102</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.terminalcommand</string>
+			<key>uid</key>
+			<string>CCCC3333-3333-3333-3333-333333333333</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>command</key>
+				<string>cd "{query}" &amp;&amp; exec codex</string>
+				<key>escaping</key>
+				<integer>102</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.terminalcommand</string>
+			<key>uid</key>
+			<string>DDDD4444-4444-4444-4444-444444444444</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>Workflow bagent — ouvrir un workspace depuis Alfred.
+
+Prérequis : le binaire `bagent` installé dans ~/.local/bin (via install.sh).
+
+Utilisation : tape `ba` puis un espace pour lister tous les workspaces
+(favoris en tête). Filtre en tapant le nom ou le groupe.
+
+  ↵      ouvrir dans VSCode
+  ⌘↵     ouvrir dans Claude Code
+  ⌥↵     ouvrir dans Codex
+
+La liste est lue en direct depuis la config bagent (~/.config/bagent) :
+toute modif via le TUI apparaît immédiatement, sans réimporter ce workflow.
+
+Claude Code et Codex s'ouvrent dans le terminal configuré dans les
+préférences Alfred (Features → Terminal).</string>
+	<key>uidata</key>
+	<dict>
+		<key>AAAA1111-1111-1111-1111-111111111111</key>
+		<dict>
+			<key>xpos</key>
+			<real>60</real>
+			<key>ypos</key>
+			<real>180</real>
+		</dict>
+		<key>BBBB2222-2222-2222-2222-222222222222</key>
+		<dict>
+			<key>xpos</key>
+			<real>360</real>
+			<key>ypos</key>
+			<real>70</real>
+		</dict>
+		<key>CCCC3333-3333-3333-3333-333333333333</key>
+		<dict>
+			<key>xpos</key>
+			<real>360</real>
+			<key>ypos</key>
+			<real>190</real>
+		</dict>
+		<key>DDDD4444-4444-4444-4444-444444444444</key>
+		<dict>
+			<key>xpos</key>
+			<real>360</real>
+			<key>ypos</key>
+			<real>310</real>
+		</dict>
+	</dict>
+	<key>version</key>
+	<string>1.0</string>
+	<key>webaddress</key>
+	<string>https://github.com/damienp199/bagent</string>
+</dict>
+</plist>

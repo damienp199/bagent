@@ -23,6 +23,12 @@ func Run() {
 		case "--version", "-v":
 			fmt.Println("  bagent", version)
 			return
+		case "alfred":
+			runAlfred()
+			return
+		case "open":
+			runOpen(os.Args[2:])
+			return
 		}
 	}
 

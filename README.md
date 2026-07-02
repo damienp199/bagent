@@ -51,6 +51,29 @@ bagent -d        # ouvrir le premier workspace dans VSCode
 bagent --help    # aide
 ```
 
+## Alfred
+
+Pour ouvrir un workspace sans passer par le terminal, un workflow Alfred est
+fourni : [`bagent.alfredworkflow`](bagent.alfredworkflow) (aussi joint à chaque
+[release](https://github.com/damienp199/bagent/releases)). Double-clique-le pour
+l'installer.
+
+Tape le keyword `ba` puis un espace pour lister tous les workspaces (favoris en
+tête, marqués `★`). Filtre en tapant le nom du dossier **ou** son groupe. Puis :
+
+| Touche | Ouvre |
+|---|---|
+| `⏎` | VSCode |
+| `⌘⏎` | Claude Code |
+| `⌥⏎` | Codex |
+
+La liste est lue **en direct** depuis la config (via `bagent alfred`) : toute
+modif faite dans le TUI apparaît aussitôt, sans réimporter le workflow. Claude
+Code et Codex s'ouvrent dans le terminal configuré dans Alfred (Features →
+Terminal). Prérequis : `bagent` dans `~/.local/bin` (l'install par défaut).
+
+Pour régénérer le workflow après modif de `alfred/info.plist` : `sh alfred/build.sh`.
+
 ## Installation
 
 macOS (Apple Silicon & Intel). **Aucune dépendance** — un binaire précompilé est téléchargé depuis les [Releases](https://github.com/damienp199/bagent/releases).
