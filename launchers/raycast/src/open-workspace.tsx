@@ -96,19 +96,34 @@ async function run(action: () => Promise<void>) {
 export default function Command() {
   const [items, setItems] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | undefined>();
 
   useEffect(() => {
     loadWorkspaces()
       .then(setItems)
-      .catch((e) =>
-        showToast({
-          style: Toast.Style.Failure,
-          title: "bagent introuvable",
-          message: String(e),
-        }),
-      )
+      .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
   }, []);
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Le CLI bagent est introuvable"
+          description="Installe bagent, puis relance cette commande. Si le binaire est ailleurs que ~/.local/bin, renseigne son chemin dans les préférences."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Voir l'installation de bagent"
+                url="https://github.com/damienp199/bagent#installation"
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Filtrer les workspaces…">

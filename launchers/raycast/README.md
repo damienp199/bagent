@@ -23,8 +23,16 @@ l'extension (Terminal.app ou iTerm).
 
 ## Prérequis
 
-Le binaire `bagent` installé (par défaut `~/.local/bin/bagent`). Si tu l'as
-ailleurs, renseigne son chemin dans les préférences de l'extension.
+Cette extension pilote le **CLI bagent**. Installe-le d'abord (macOS) :
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/damienp199/bagent/main/install.sh | sh
+```
+
+Le binaire atterrit dans `~/.local/bin/bagent` (emplacement par défaut lu par
+l'extension). Si tu l'installes ailleurs, renseigne son chemin dans les
+préférences de l'extension. Sans bagent, la commande affiche un lien
+d'installation.
 
 ## Installation (dev local)
 
