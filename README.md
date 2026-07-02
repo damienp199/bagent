@@ -74,6 +74,19 @@ Terminal). Prérequis : `bagent` dans `~/.local/bin` (l'install par défaut).
 
 Pour régénérer le workflow après modif de `alfred/info.plist` : `sh alfred/build.sh`.
 
+## Raycast
+
+Une extension Raycast équivalente est fournie dans [`raycast/`](raycast/) — même
+principe (liste live via `bagent json`), keyboard : `⏎` VSCode, `⌘⏎` Claude Code,
+`⌥⏎` Codex. Installation en dev local :
+
+```sh
+cd raycast && npm install && npm run dev
+```
+
+L'extension apparaît alors dans Raycast sous **Open Workspace**. Détails dans
+[`raycast/README.md`](raycast/README.md).
+
 ## Installation
 
 macOS (Apple Silicon & Intel). **Aucune dépendance** — un binaire précompilé est téléchargé depuis les [Releases](https://github.com/damienp199/bagent/releases).

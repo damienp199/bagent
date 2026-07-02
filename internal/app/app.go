@@ -26,6 +26,9 @@ func Run() {
 		case "alfred":
 			runAlfred()
 			return
+		case "json":
+			runJSON()
+			return
 		case "open":
 			runOpen(os.Args[2:])
 			return
