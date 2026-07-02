@@ -29,8 +29,8 @@ Format par item :
 ```json
 {
   "uid": "/Users/x/Documents/Dev/bagent",
-  "title": "[DEV] bagent",
-  "subtitle": "★ ~/Documents/Dev/bagent",
+  "title": "[DEV] bagent ★",
+  "subtitle": "↵ VSCode",
   "arg": "/Users/x/Documents/Dev/bagent",
   "match": "bagent dev",
   "icon": { "type": "fileicon", "path": "/Users/x/Documents/Dev/bagent" },
@@ -44,11 +44,21 @@ Format par item :
 Règles d'affichage :
 
 - `title` = `[GROUPE] nom`, où GROUPE = `strings.ToUpper(filepath.Base(filepath.Dir(chemin)))`.
-- `subtitle` = chemin abrégé avec `~`, préfixé `★ ` si le chemin est un favori.
+  Suffixé ` ★` si le chemin est un favori.
+- `subtitle` = l'action par défaut (`↵ VSCode`). Le chemin n'est **pas** affiché
+  (bruit) — il reste dans `arg`. Les `mods` changent le subtitle au survol :
+  ⌘ → « Ouvrir dans Claude Code », ⌥ → « Ouvrir dans Codex ».
 - `match` = nom + groupe (en minuscules) → `ba` ou `dev` matchent tous deux.
 - `icon.type` = `fileicon` → vraie icône macOS du dossier.
 - État vide (aucun workspace) → un item unique `valid:false`,
   title « Aucun workspace configuré », subtitle « Configure via bagent ».
+
+### Déduplication
+
+Les items sont dédupliqués par **chemin complet**. Un dossier présent à la fois
+dans les favoris et sous un projet n'apparaît qu'une fois. Le groupe et le `★`
+dérivent du chemin (pas de la page source), donc l'entrée unique porte toujours
+son vrai groupe (`[DEV]`, jamais `[FAV]`) et le `★` si le chemin est favori.
 
 ### 2. `bagent open --tool=code <chemin>` (nouvelle sous-commande Go)
 
