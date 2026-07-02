@@ -39,3 +39,45 @@ script compile depuis les sources au lieu de télécharger. C'est le mode dev.
 ```sh
 bagent --help
 ```
+
+## Lanceurs (Alfred / Raycast) — proposer, ne pas imposer
+
+Une fois le CLI installé et vérifié, **demande à l'utilisateur** s'il veut un lanceur
+pour ouvrir ses workspaces sans passer par le terminal. Pose la question avec un
+**AskUserQuestion** (choix multiple), pas en texte libre. Propose : **Alfred**,
+**Raycast**, **Les deux**, **Aucun**. N'installe que ce qu'il choisit.
+
+Les deux lanceurs dépendent du CLI déjà installé (`bagent alfred` / `bagent json`).
+
+### Alfred
+
+Prérequis : Alfred **avec Powerpack** (les workflows ne marchent pas en version gratuite).
+
+1. Récupère le workflow depuis la dernière release (pas besoin du repo) :
+   ```sh
+   cd "$(mktemp -d)" && \
+   gh release download --repo damienp199/bagent --pattern 'bagent.alfredworkflow' 2>/dev/null || \
+   curl -fsSLO https://github.com/damienp199/bagent/releases/latest/download/bagent.alfredworkflow
+   open bagent.alfredworkflow
+   ```
+2. L'utilisateur clique **Import** dans la fenêtre Alfred (action manuelle, tu ne peux pas la faire).
+3. Dis-lui : keyword `ba` + espace → liste des workspaces ; `⏎` VSCode, `⌘⏎` Claude Code, `⌥⏎` Codex.
+4. Claude/Codex s'ouvrent dans le terminal réglé dans **Alfred → Features → Terminal** — indique-le.
+
+### Raycast
+
+Prérequis : **Raycast installé** (`brew install --cask raycast`) et **node/npm**. L'extension
+n'est **pas** sur le Store : elle s'installe depuis le repo (clone-le si besoin).
+
+```sh
+git clone https://github.com/damienp199/bagent.git 2>/dev/null || true
+cd bagent/launchers/raycast
+npm install
+npm run dev      # importe l'extension dans Raycast ; laisse tourner ~5s puis Ctrl+C
+```
+
+`npm run dev` importe l'extension (mode développement, elle **reste installée** après Ctrl+C).
+Dis à l'utilisateur : cherche **Bagent** dans Raycast → `⏎` VSCode, `⌘⏎` Claude Code, `⌥⏎` Codex.
+Il peut assigner un **alias** (ex. `ba`) à la commande, et choisir Terminal.app/iTerm dans les
+**préférences de l'extension** (pour Claude/Codex). Si `bagent` n'est pas dans `~/.local/bin`,
+son chemin se règle aussi dans ces préférences.
