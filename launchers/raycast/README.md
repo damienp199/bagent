@@ -7,8 +7,8 @@ La liste est lue **en direct** via `bagent json` : toute modif faite dans le TUI
 
 ## Commande
 
-**Open Workspace** — liste tous tes workspaces (favoris marqués `★`, filtrables
-par nom ou groupe). Actions sur l'item sélectionné :
+**bagent** — liste tous tes workspaces (favoris marqués `★`, filtrables par nom
+ou groupe). Actions sur l'item sélectionné :
 
 | Touche | Ouvre |
 |---|---|
@@ -29,7 +29,7 @@ ailleurs, renseigne son chemin dans les préférences de l'extension.
 ## Installation (dev local)
 
 ```sh
-cd raycast
+cd launchers/raycast
 npm install
 npm run dev     # ouvre Raycast en mode développement, commande dispo aussitôt
 ```

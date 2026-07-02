@@ -14,6 +14,6 @@ LD="-X github.com/damienp199/bagent/internal/app.version=$TAG"
 mkdir -p dist
 CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "$LD" -o dist/bagent-darwin-arm64 .
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "$LD" -o dist/bagent-darwin-amd64 .
-sh alfred/build.sh
-gh release create "$TAG" dist/bagent-darwin-arm64 dist/bagent-darwin-amd64 bagent.alfredworkflow \
+sh launchers/alfred/build.sh
+gh release create "$TAG" dist/bagent-darwin-arm64 dist/bagent-darwin-amd64 launchers/bagent.alfredworkflow \
   --target main --title "$TAG" --notes "$NOTES"

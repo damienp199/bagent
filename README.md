@@ -54,9 +54,9 @@ bagent --help    # aide
 ## Alfred
 
 Pour ouvrir un workspace sans passer par le terminal, un workflow Alfred est
-fourni : [`bagent.alfredworkflow`](bagent.alfredworkflow) (aussi joint à chaque
-[release](https://github.com/damienp199/bagent/releases)). Double-clique-le pour
-l'installer.
+fourni : [`launchers/bagent.alfredworkflow`](launchers/bagent.alfredworkflow)
+(aussi joint à chaque [release](https://github.com/damienp199/bagent/releases)).
+Double-clique-le pour l'installer.
 
 Tape le keyword `ba` puis un espace pour lister tous les workspaces (favoris en
 tête, marqués `★`). Filtre en tapant le nom du dossier **ou** son groupe. Puis :
@@ -72,20 +72,22 @@ modif faite dans le TUI apparaît aussitôt, sans réimporter le workflow. Claud
 Code et Codex s'ouvrent dans le terminal configuré dans Alfred (Features →
 Terminal). Prérequis : `bagent` dans `~/.local/bin` (l'install par défaut).
 
-Pour régénérer le workflow après modif de `alfred/info.plist` : `sh alfred/build.sh`.
+Pour régénérer le workflow après modif de `launchers/alfred/info.plist` :
+`sh launchers/alfred/build.sh`.
 
 ## Raycast
 
-Une extension Raycast équivalente est fournie dans [`raycast/`](raycast/) — même
-principe (liste live via `bagent json`), keyboard : `⏎` VSCode, `⌘⏎` Claude Code,
-`⌥⏎` Codex. Installation en dev local :
+Une extension Raycast équivalente est fournie dans
+[`launchers/raycast/`](launchers/raycast/) — même principe (liste live via
+`bagent json`), keyboard : `⏎` VSCode, `⌘⏎` Claude Code, `⌥⏎` Codex. Installation
+en dev local :
 
 ```sh
-cd raycast && npm install && npm run dev
+cd launchers/raycast && npm install && npm run dev
 ```
 
-L'extension apparaît alors dans Raycast sous **Open Workspace**. Détails dans
-[`raycast/README.md`](raycast/README.md).
+L'extension apparaît alors dans Raycast sous **bagent**. Détails dans
+[`launchers/raycast/README.md`](launchers/raycast/README.md).
 
 ## Installation
 
