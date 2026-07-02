@@ -44,9 +44,10 @@ async function loadWorkspaces(): Promise<Workspace[]> {
   return JSON.parse(stdout) as Workspace[];
 }
 
-// VSCode : lancement détaché, réutilise `bagent open` (et son ensurePATH).
+// VSCode : ouverture directe via `open -a` (robuste, sans dépendre du CLI
+// `code` ni du PATH transmis par Raycast).
 async function openVSCode(path: string) {
-  await pexecFile(bagentBin(), ["open", "--tool=code", path], { env: env() });
+  await pexecFile("open", ["-a", "Visual Studio Code", path]);
 }
 
 // Claude/Codex : nécessitent un terminal interactif. On ouvre le terminal

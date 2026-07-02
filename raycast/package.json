@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "open-workspace",
-      "title": "Open Workspace",
+      "title": "bagent",
       "description": "Liste et ouvre tes workspaces bagent",
       "mode": "view"
     }
