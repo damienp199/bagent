@@ -36,7 +36,10 @@ function bagentBin(): string {
 // PATH enrichi de ~/.local/bin : les binaires (code…) n'y sont pas dans
 // l'environnement non-interactif de Raycast.
 function env() {
-  return { ...process.env, PATH: `${homedir()}/.local/bin:${process.env.PATH ?? ""}` };
+  return {
+    ...process.env,
+    PATH: `${homedir()}/.local/bin:${process.env.PATH ?? ""}`,
+  };
 }
 
 async function loadWorkspaces(): Promise<Workspace[]> {
@@ -82,7 +85,11 @@ async function run(action: () => Promise<void>) {
     await action();
     await closeMainWindow();
   } catch (e) {
-    await showToast({ style: Toast.Style.Failure, title: "Échec de l'ouverture", message: String(e) });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Échec de l'ouverture",
+      message: String(e),
+    });
   }
 }
 
@@ -115,22 +122,29 @@ export default function Command() {
           accessories={ws.fav ? [{ icon: Icon.Star, tooltip: "Favori" }] : []}
           actions={
             <ActionPanel>
-              <Action title="Ouvrir dans VSCode" icon={Icon.Code} onAction={() => run(() => openVSCode(ws.path))} />
               <Action
-                title="Ouvrir dans Claude Code"
+                title="Ouvrir Dans Vscode"
+                icon={Icon.Code}
+                onAction={() => run(() => openVSCode(ws.path))}
+              />
+              <Action
+                title="Ouvrir Dans Claude Code"
                 icon={Icon.Terminal}
                 shortcut={{ modifiers: ["cmd"], key: "return" }}
                 onAction={() => run(() => openInTerminal("claude", ws.path))}
               />
               <Action
-                title="Ouvrir dans Codex"
+                title="Ouvrir Dans Codex"
                 icon={Icon.Terminal}
                 shortcut={{ modifiers: ["opt"], key: "return" }}
                 onAction={() => run(() => openInTerminal("codex", ws.path))}
               />
-              <Action.ShowInFinder path={ws.path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+              <Action.ShowInFinder
+                path={ws.path}
+                shortcut={{ modifiers: ["cmd"], key: "f" }}
+              />
               <Action.CopyToClipboard
-                title="Copier le chemin"
+                title="Copier Le Chemin"
                 content={ws.path}
                 shortcut={{ modifiers: ["cmd"], key: "." }}
               />

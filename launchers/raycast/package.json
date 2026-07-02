@@ -1,15 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bagent",
-  "title": "bagent",
+  "title": "Bagent",
   "description": "Ouvre un workspace bagent dans VSCode, Claude Code ou Codex",
   "icon": "icon.png",
   "author": "damienpugin",
+  "categories": ["Developer Tools", "Productivity"],
   "license": "MIT",
   "commands": [
     {
       "name": "open-workspace",
-      "title": "bagent",
+      "title": "Bagent",
       "description": "Liste et ouvre tes workspaces bagent",
       "mode": "view"
     }
