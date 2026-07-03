@@ -12,7 +12,7 @@ func TestAlfredItemFormat(t *testing.T) {
 			{Name: "bagent", FullPath: "/Users/x/Documents/Dev/bagent"},
 		}},
 	}
-	res := alfredResultFrom(pages, map[string]bool{})
+	res := alfredResultFrom(pages, map[string]bool{}, "")
 	if len(res.Items) != 1 {
 		t.Fatalf("attendu 1 item, obtenu %d", len(res.Items))
 	}
@@ -28,9 +28,6 @@ func TestAlfredItemFormat(t *testing.T) {
 	}
 	if it.Subtitle != "↵ VSCode" {
 		t.Errorf("subtitle = %q", it.Subtitle)
-	}
-	if it.Match != "bagent dev" {
-		t.Errorf("match = %q, attendu %q", it.Match, "bagent dev")
 	}
 	if it.Icon == nil || it.Icon.Type != "fileicon" || it.Icon.Path != it.Arg {
 		t.Errorf("icon = %+v", it.Icon)
@@ -48,7 +45,7 @@ func TestAlfredFavoriteStar(t *testing.T) {
 	pages := []Page{
 		{Kind: KindProjet, Items: []Item{{Name: "bagent", FullPath: path}}},
 	}
-	res := alfredResultFrom(pages, map[string]bool{path: true})
+	res := alfredResultFrom(pages, map[string]bool{path: true}, "")
 	if got := res.Items[0].Title; got != "[DEV] bagent ★" {
 		t.Errorf("title favori = %q, attendu %q", got, "[DEV] bagent ★")
 	}
@@ -61,7 +58,7 @@ func TestAlfredDedupByPath(t *testing.T) {
 		{Kind: KindFavoris, Items: []Item{{Name: "bagent", FullPath: path, Fav: true}}},
 		{Kind: KindProjet, Items: []Item{{Name: "bagent", FullPath: path}}},
 	}
-	res := alfredResultFrom(pages, map[string]bool{path: true})
+	res := alfredResultFrom(pages, map[string]bool{path: true}, "")
 	if len(res.Items) != 1 {
 		t.Fatalf("attendu 1 item après dédup, obtenu %d", len(res.Items))
 	}
@@ -71,8 +68,50 @@ func TestAlfredDedupByPath(t *testing.T) {
 	}
 }
 
+// Le filtrage se fait dans le binaire, en sous-chaîne : « reach » doit sortir
+// « pme-outreach-podcast » (milieu de mot), ce qu'Alfred ne fait pas nativement.
+func TestAlfredSubstringFilter(t *testing.T) {
+	pages := []Page{{Kind: KindProjet, Items: []Item{
+		{Name: "pme-outreach-podcast", FullPath: "/Users/x/Documents/AgenticOS/pme-outreach-podcast"},
+		{Name: "prospection", FullPath: "/Users/x/Documents/AgenticOS/prospection"},
+	}}}
+	favs := map[string]bool{}
+
+	// Sous-chaîne au milieu d'un mot.
+	res := alfredResultFrom(pages, favs, "reach")
+	if len(res.Items) != 1 || res.Items[0].Title != "[AGENTICOS] pme-outreach-podcast" {
+		t.Fatalf("« reach » : attendu pme-outreach-podcast, obtenu %+v", titles(res))
+	}
+
+	// Plusieurs termes : tous doivent matcher (ordre indifférent).
+	res = alfredResultFrom(pages, favs, "podcast pme")
+	if len(res.Items) != 1 {
+		t.Fatalf("« podcast pme » : attendu 1 item, obtenu %v", titles(res))
+	}
+
+	// Le groupe est recherchable.
+	res = alfredResultFrom(pages, favs, "agenticos")
+	if len(res.Items) != 2 {
+		t.Fatalf("« agenticos » : attendu 2 items, obtenu %v", titles(res))
+	}
+
+	// Aucun match → item d'état, non valide.
+	res = alfredResultFrom(pages, favs, "zzz")
+	if len(res.Items) != 1 || res.Items[0].Valid == nil || *res.Items[0].Valid {
+		t.Fatalf("« zzz » : attendu 1 item invalide, obtenu %+v", res.Items)
+	}
+}
+
+func titles(res alfredResult) []string {
+	var out []string
+	for _, it := range res.Items {
+		out = append(out, it.Title)
+	}
+	return out
+}
+
 func TestAlfredEmptyState(t *testing.T) {
-	res := alfredResultFrom(nil, map[string]bool{})
+	res := alfredResultFrom(nil, map[string]bool{}, "")
 	if len(res.Items) != 1 {
 		t.Fatalf("attendu 1 item d'état vide, obtenu %d", len(res.Items))
 	}
@@ -91,7 +130,7 @@ func TestAlfredJSONOmitsValidOnNormalItem(t *testing.T) {
 	pages := []Page{{Kind: KindProjet, Items: []Item{
 		{Name: "bagent", FullPath: "/Users/x/Documents/Dev/bagent"},
 	}}}
-	res := alfredResultFrom(pages, map[string]bool{})
+	res := alfredResultFrom(pages, map[string]bool{}, "")
 	b, err := json.Marshal(res)
 	if err != nil {
 		t.Fatal(err)

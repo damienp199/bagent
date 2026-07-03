@@ -64,6 +64,12 @@ Prérequis : Alfred **avec Powerpack** (les workflows ne marchent pas en version
 3. Dis-lui : keyword `ba` + espace → liste des workspaces ; `⏎` VSCode, `⌘⏎` Claude Code, `⌥⏎` Codex.
 4. Claude/Codex s'ouvrent dans le terminal réglé dans **Alfred → Features → Terminal** — indique-le.
 
+> **Itération sur le workflow** : après avoir édité `launchers/alfred/info.plist`,
+> lance `launchers/alfred/build.sh --reimport`. Alfred **ne relit pas** un
+> `info.plist` écrasé sous ses pieds : sans réimport, l'ancienne définition reste
+> active en mémoire (symptôme typique : le terminal exécute le chemin nu du
+> workspace → `zsh: permission denied`, au lieu d'y `cd` puis lancer claude/codex).
+
 ### Raycast
 
 Prérequis : **Raycast installé** (`brew install --cask raycast`) et **node/npm**. L'extension

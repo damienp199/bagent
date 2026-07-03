@@ -27,12 +27,22 @@ func parseOpenArgs(args []string) (action, target string) {
 }
 
 // runOpen ouvre un workspace dans l'outil demandé. Colle appelée par le
-// workflow Alfred pour VSCode (réutilise ensurePATH via openVSCode).
+// workflow Alfred (actions Run Script). Pour claude/codex, on ouvre une
+// nouvelle fenêtre de terminal (openTerminalWith) : depuis Alfred il n'y a pas
+// de terminal courant, donc l'exec in-place de execAction ne s'applique pas.
 func runOpen(args []string) {
 	action, target := parseOpenArgs(args)
 	if target == "" {
 		fmt.Fprintln(os.Stderr, "  ✗ chemin manquant")
 		os.Exit(1)
 	}
-	execAction(action, target)
+	switch action {
+	case "claude", "codex":
+		if err := openTerminalWith(action, target); err != nil {
+			fmt.Fprintln(os.Stderr, "  ✗", err)
+			os.Exit(1)
+		}
+	default:
+		execAction(action, target)
+	}
 }

@@ -24,7 +24,7 @@ func Run() {
 			fmt.Println("  bagent", version)
 			return
 		case "alfred":
-			runAlfred()
+			runAlfred(os.Args[2:])
 			return
 		case "json":
 			runJSON()

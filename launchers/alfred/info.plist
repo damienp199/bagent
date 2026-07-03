@@ -56,9 +56,7 @@
 			<key>config</key>
 			<dict>
 				<key>alfredfiltersresults</key>
-				<true/>
-				<key>alfredfiltersresultsmatchmode</key>
-				<integer>0</integer>
+				<false/>
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
@@ -76,7 +74,7 @@
 				<key>runningsubtext</key>
 				<string>Chargement des workspaces…</string>
 				<key>script</key>
-				<string>PATH="$HOME/.local/bin:$PATH" bagent alfred</string>
+				<string>PATH="$HOME/.local/bin:$PATH" bagent alfred "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -123,32 +121,48 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>command</key>
-				<string>cd "{query}" &amp;&amp; exec claude</string>
+				<key>concurrently</key>
+				<false/>
 				<key>escaping</key>
 				<integer>102</integer>
+				<key>script</key>
+				<string>PATH="$HOME/.local/bin:$PATH" bagent open --tool=claude "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.action.terminalcommand</string>
+			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
 			<string>CCCC3333-3333-3333-3333-333333333333</string>
 			<key>version</key>
-			<integer>1</integer>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>command</key>
-				<string>cd "{query}" &amp;&amp; exec codex</string>
+				<key>concurrently</key>
+				<false/>
 				<key>escaping</key>
 				<integer>102</integer>
+				<key>script</key>
+				<string>PATH="$HOME/.local/bin:$PATH" bagent open --tool=codex "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.action.terminalcommand</string>
+			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
 			<string>DDDD4444-4444-4444-4444-444444444444</string>
 			<key>version</key>
-			<integer>1</integer>
+			<integer>2</integer>
 		</dict>
 	</array>
 	<key>readme</key>
@@ -166,8 +180,8 @@ Utilisation : tape `ba` puis un espace pour lister tous les workspaces
 La liste est lue en direct depuis la config bagent (~/.config/bagent) :
 toute modif via le TUI apparaît immédiatement, sans réimporter ce workflow.
 
-Claude Code et Codex s'ouvrent dans le terminal configuré dans les
-préférences Alfred (Features → Terminal).</string>
+Claude Code et Codex s'ouvrent dans une nouvelle fenêtre Terminal.app
+(lancée par bagent), indépendamment du réglage Alfred → Features → Terminal.</string>
 	<key>uidata</key>
 	<dict>
 		<key>AAAA1111-1111-1111-1111-111111111111</key>
