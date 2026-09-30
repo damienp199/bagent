@@ -79,8 +79,9 @@ type model struct {
 	input       textinput.Model
 	status      string
 
-	action string // résultat à exécuter après la sortie
-	target string
+	action      string // résultat à exécuter après la sortie
+	target      string
+	closeWindow bool // fermer la fenêtre du terminal après la sortie
 
 	updateTag string // tag d'une mise à jour disponible ("" sinon)
 }
@@ -274,13 +275,14 @@ func (m model) launch(action string, it Item) (tea.Model, tea.Cmd) {
 		return m, clearStatusCmd()
 	}
 	if action == "vscode" {
-		// VSCode s'ouvre en détaché : on reste dans le menu (pas de tea.Quit).
+		// VSCode s'ouvre en détaché : on quitte puis on ferme la fenêtre du
+		// terminal (en cas d'erreur, on reste dans le menu pour l'afficher).
 		if err := openVSCode(it.FullPath); err != nil {
 			m.status = stRed.Render("✗") + " " + err.Error()
-		} else {
-			m.status = stGreen.Render("✓") + " VSCode " + stDim.Render(it.Name)
+			return m, clearStatusCmd()
 		}
-		return m, clearStatusCmd()
+		m.closeWindow = true
+		return m, tea.Quit
 	}
 	if action == "claude" || action == "codex" {
 		if !toolAvailable(action) {

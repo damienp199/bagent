@@ -17,3 +17,14 @@ func TestTerminalLaunchCmd(t *testing.T) {
 		}
 	}
 }
+
+func TestIsShell(t *testing.T) {
+	for comm, want := range map[string]bool{
+		"-zsh": true, "zsh": true, "/bin/bash": true, "-fish": true,
+		"node": false, "python3": false, "": false,
+	} {
+		if got := isShell(comm); got != want {
+			t.Errorf("isShell(%q) = %v, want %v", comm, got, want)
+		}
+	}
+}

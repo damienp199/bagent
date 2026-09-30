@@ -45,6 +45,10 @@ func Run() {
 	if !ok {
 		return
 	}
+	if m.closeWindow {
+		closeTerminalWindow()
+		return
+	}
 	execAction(m.action, m.target)
 }
 

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -110,7 +112,7 @@ end run`
 	return exec.Command("osascript", "-e", script, cmd).Run()
 }
 
-// openVSCode ouvre le workspace dans VSCode (détaché), sans fermer le terminal.
+// openVSCode ouvre le workspace dans VSCode (détaché).
 func openVSCode(dir string) error {
 	if path, err := exec.LookPath("code"); err == nil {
 		cmd := exec.Command(path, dir)
@@ -124,6 +126,50 @@ func openVSCode(dir string) error {
 		}
 	}
 	return nil
+}
+
+// isShell indique si comm (sortie de `ps -o comm=`, ex. "-zsh",
+// "/bin/bash") désigne un shell interactif.
+func isShell(comm string) bool {
+	switch filepath.Base(strings.TrimPrefix(comm, "-")) {
+	case "zsh", "bash", "fish", "sh":
+		return true
+	}
+	return false
+}
+
+// closeTerminalWindow ferme la fenêtre du terminal qui a lancé bagent en tuant
+// son shell parent (SIGHUP : un shell interactif ignore SIGTERM). Ghostty,
+// iTerm, VSCode… ferment la fenêtre/l'onglet à la sortie du shell. Terminal.app
+// ne ferme que si le shell sort proprement : on ferme alors la fenêtre par son
+// tty via AppleScript, depuis un process détaché (nouvelle session, survit au
+// hangup) qui attend la mort du shell pour éviter la confirmation de fermeture.
+// Ne fait rien si le parent n'est pas un shell (ex. lancé par un script).
+func closeTerminalWindow() {
+	ppid := os.Getppid()
+	out, err := exec.Command("ps", "-o", "comm=,tty=", "-p", strconv.Itoa(ppid)).Output()
+	if err != nil {
+		return
+	}
+	fields := strings.Fields(string(out))
+	if len(fields) < 2 || !isShell(fields[0]) {
+		return
+	}
+	if os.Getenv("TERM_PROGRAM") == "Apple_Terminal" {
+		const script = `on run argv
+	tell application "Terminal"
+		repeat with w in windows
+			if (count of tabs of w) is 1 and tty of tab 1 of w is (item 1 of argv) then close w
+		end repeat
+	end tell
+end run`
+		c := exec.Command("sh", "-c", `sleep 0.3; osascript -e "$1" "$2"`, "sh", script, "/dev/"+fields[1])
+		c.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+		if c.Start() == nil {
+			_ = c.Process.Release()
+		}
+	}
+	_ = syscall.Kill(ppid, syscall.SIGHUP)
 }
 
 // openFinder ouvre un dossier dans le Finder (sans quitter bagent).
